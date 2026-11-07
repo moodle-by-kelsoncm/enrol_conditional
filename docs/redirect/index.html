@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>moodle-enrol_conditional</title>
+  <!-- Without JavaScript, fall back to English. -->
+  <noscript><meta http-equiv="refresh" content="0; url=en/"></noscript>
+  <link rel="canonical" href="en/">
+  <script>
+    (function () {
+      var langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+      var target = 'en/';
+      for (var i = 0; i < langs.length; i++) {
+        var l = String(langs[i]).toLowerCase();
+        if (l === 'pt' || l.indexOf('pt-') === 0) { target = 'pt-br/'; break; }
+        if (l === 'en' || l.indexOf('en-') === 0) { break; }
+      }
+      window.location.replace(target + window.location.hash);
+    })();
+  </script>
+</head>
+<body>
+  <p>
+    <a href="en/">English</a> ·
+    <a href="pt-br/">Português (Brasil)</a>
+  </p>
+</body>
+</html>

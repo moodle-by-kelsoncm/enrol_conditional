@@ -1,0 +1,38 @@
+# Moodle specific
+/.moodle
+/.moodle-plugin-ci
+/config.php
+
+# IDE
+/.idea
+/.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+/phpunit.xml
+/behat.yml
+
+# Build artifacts
+/node_modules
+/vendor
+*.log
+package.json
+package-lock.json
+# Pre-commit
+/.pre-commit-framework/
+.pre-commit-framework.egg-info
+
+
+docs/_build/
+
+# Documentation and release builds
+docs/_build/
+_site/
+dist/
+*.zip
