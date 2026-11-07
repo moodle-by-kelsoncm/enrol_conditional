@@ -31,6 +31,9 @@ use core_enrol\output\enrol_page;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_conditional_plugin extends enrol_plugin {
+    /** @var string Column of the enrol table with the condition tree (JSON). */
+    public const FIELD_CONDITIONS = 'customtext2';
+
     /** @var stdClass|null Last enroller found by get_enroller(). */
     protected $lasternoller = null;
     /** @var int Instance id of the last enroller found by get_enroller(). */
@@ -1036,6 +1039,18 @@ class enrol_conditional_plugin extends enrol_plugin {
             }
         }
 
+        // Conditions for self enrolment.
+        if (has_capability('enrol/conditional:config', $context)) {
+            \local_enrolconditions\output\tree_editor::add_to_form(
+                $mform,
+                self::FIELD_CONDITIONS,
+                get_string('conditions', 'enrol_conditional'),
+                $context,
+                $instance->{self::FIELD_CONDITIONS} ?? null,
+            );
+            $mform->addHelpButton(self::FIELD_CONDITIONS . '_editor', 'conditions', 'enrol_conditional');
+        }
+
         // Course welcome message.
         if (has_any_capability(['enrol/conditional:config', 'moodle/course:editcoursewelcomemessage'], $context)) {
             $mform->addElement(
@@ -1197,7 +1212,52 @@ class enrol_conditional_plugin extends enrol_plugin {
         $typeerrors = $this->validate_param_types($data, $tovalidate);
         $errors = array_merge($errors, $typeerrors);
 
+        if (array_key_exists(self::FIELD_CONDITIONS, $data)) {
+            $message = $this->validate_conditions((string) $data[self::FIELD_CONDITIONS], $instance);
+            if ($message !== null) {
+                $errors[self::FIELD_CONDITIONS . '_editor'] = $message;
+            }
+        }
+
         return $errors;
+    }
+
+    /**
+     * Validates the JSON of a condition tree.
+     *
+     * Types already used by the saved tree are accepted even when they were disabled since.
+     *
+     * @param string $json Submitted tree.
+     * @param stdClass|null $instance Instance being edited, if it exists.
+     * @return string|null Error message, or null when valid.
+     */
+    public function validate_conditions(string $json, ?stdClass $instance = null): ?string {
+        try {
+            $tree = \local_enrolconditions\tree::from_json($json);
+        } catch (\local_enrolconditions\invalid_tree_exception $e) {
+            return $e->getMessage();
+        }
+        $allowed = [];
+        if (!empty($instance->{self::FIELD_CONDITIONS})) {
+            try {
+                $allowed = \local_enrolconditions\tree::from_json($instance->{self::FIELD_CONDITIONS})->get_types();
+            } catch (\local_enrolconditions\invalid_tree_exception $e) {
+                $allowed = [];
+            }
+        }
+        $errors = $tree->validate($allowed);
+        return $errors ? implode(' ', $errors) : null;
+    }
+
+    /**
+     * Normalised JSON of a condition tree, for storage.
+     *
+     * @param string|null $json
+     * @return string|null Null when there are no conditions.
+     * @throws \local_enrolconditions\invalid_tree_exception When the structure is invalid.
+     */
+    protected function normalise_conditions(?string $json): ?string {
+        return \local_enrolconditions\tree::from_json($json)->to_json();
     }
 
     /**
@@ -1216,6 +1276,9 @@ class enrol_conditional_plugin extends enrol_plugin {
             } else {
                 $fields['notifyall'] = 0;
             }
+        }
+        if (!empty($fields) && array_key_exists(self::FIELD_CONDITIONS, $fields)) {
+            $fields[self::FIELD_CONDITIONS] = $this->normalise_conditions($fields[self::FIELD_CONDITIONS]);
         }
 
         return parent::add_instance($course, $fields);
@@ -1242,6 +1305,13 @@ class enrol_conditional_plugin extends enrol_plugin {
         // Add previous value of newenrols if disabled.
         if (!isset($data->customint6)) {
             $data->customint6 = $instance->customint6;
+        }
+        // Keep the conditions when the form did not send them (user without enrol/conditional:config).
+        if (!property_exists($data, self::FIELD_CONDITIONS)) {
+            $data->{self::FIELD_CONDITIONS} = $instance->{self::FIELD_CONDITIONS};
+        } else {
+            // Core skips null values, so an empty tree is stored as an empty string.
+            $data->{self::FIELD_CONDITIONS} = $this->normalise_conditions($data->{self::FIELD_CONDITIONS}) ?? '';
         }
 
         return parent::update_instance($instance, $data);
