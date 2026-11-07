@@ -1,6 +1,6 @@
 # enrol_conditional - Agent Guidelines
 
-Enrolment method copied from `enrol_self` (Moodle 5.3) where self enrolment depends on pluggable conditions (`enrolcond` subplugins). Supports Moodle 5.3 LTS only.
+Enrolment method copied from `enrol_self` (Moodle 5.3) where self enrolment depends on pluggable conditions provided by `local_enrolconditions` (`enrolcond` subplugins and the `collect_conditions` hook). Supports Moodle 5.3 LTS only.
 
 ## Rules
 

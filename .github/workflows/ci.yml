@@ -63,6 +63,9 @@ jobs:
           sudo locale-gen en_AU.UTF-8
           echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
 
+      - name: Add required plugin local_enrolconditions
+        run: moodle-plugin-ci add-plugin moodle-by-kelsoncm/local_enrolconditions
+
       - name: Install moodle-plugin-ci
         run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
         env:
