@@ -433,18 +433,6 @@ class enrol_conditional_plugin extends enrol_plugin {
             }
         }
 
-        if ($instance->customint5) {
-            require_once("$CFG->dirroot/cohort/lib.php");
-            if (!cohort_is_member($instance->customint5, $USER->id)) {
-                $cohort = $DB->get_record('cohort', ['id' => $instance->customint5]);
-                if (!$cohort) {
-                    return null;
-                }
-                $a = format_string($cohort->name, true, ['context' => context::instance_by_id($cohort->contextid)]);
-                return markdown_to_html(get_string('cohortnonmemberinfo', 'enrol_conditional', $a));
-            }
-        }
-
         // Conditions are checked for logged in users only; guests are refused by can_self_enrol().
         if (isloggedin() && !isguestuser()) {
             $result = $this->evaluate_conditions($instance, (int) $USER->id);
@@ -560,7 +548,6 @@ class enrol_conditional_plugin extends enrol_plugin {
         $fields['customint2']      = $this->get_config('longtimenosee');
         $fields['customint3']      = $this->get_config('maxenrolled');
         $fields['customint4']      = $this->get_config('sendcoursewelcomemessage');
-        $fields['customint5']      = 0;
         $fields['customint6']      = $this->get_config('newenrols');
         $fields[self::FIELD_ACTION] = self::get_action_field(null);
         $fields[self::FIELD_CHECKMODES] = self::get_default_check_modes();
@@ -850,14 +837,6 @@ class enrol_conditional_plugin extends enrol_plugin {
             $instance = reset($instances);
             $instanceid = $instance->id;
         } else {
-            if (!empty($data->customint5)) {
-                if (!$step->get_task()->is_samesite()) {
-                    // Keep cohort restriction unchanged on the same site; clear it otherwise.
-                    // Use some id that can not exist in order to prevent self enrolment,
-                    // because we do not know what cohort it is in this site.
-                    $data->customint5 = -1;
-                }
-            }
             $instanceid = $this->add_instance($course, (array)$data);
         }
         $step->set_mapping('enrol', $oldid, $instanceid);
@@ -1122,41 +1101,6 @@ class enrol_conditional_plugin extends enrol_plugin {
             $mform->addElement('text', 'customint3', get_string('maxenrolled', 'enrol_conditional'));
             $mform->addHelpButton('customint3', 'maxenrolled', 'enrol_conditional');
             $mform->setType('customint3', PARAM_INT);
-
-            require_once($CFG->dirroot . '/cohort/lib.php');
-
-            $cohorts = [0 => get_string('no')];
-            $allcohorts = cohort_get_available_cohorts($context, 0, 0, 0);
-            if ($instance->customint5 && !isset($allcohorts[$instance->customint5])) {
-                $c = $DB->get_record(
-                    'cohort',
-                    ['id' => $instance->customint5],
-                    'id, name, idnumber, contextid, visible',
-                    IGNORE_MISSING
-                );
-                if ($c) {
-                    // Current cohort was not found because current user can not see it. Still keep it.
-                    $allcohorts[$instance->customint5] = $c;
-                }
-            }
-            foreach ($allcohorts as $c) {
-                $cohorts[$c->id] = format_string($c->name, true, ['context' => context::instance_by_id($c->contextid)]);
-                if ($c->idnumber) {
-                    $cohorts[$c->id] .= ' [' . s($c->idnumber) . ']';
-                }
-            }
-            if ($instance->customint5 && !isset($allcohorts[$instance->customint5])) {
-                // Somebody deleted a cohort, better keep the wrong value so that random ppl can not enrol.
-                $cohorts[$instance->customint5] = get_string('unknowncohort', 'cohort', $instance->customint5);
-            }
-            if (count($cohorts) > 1) {
-                $mform->addElement('select', 'customint5', get_string('cohortonly', 'enrol_conditional'), $cohorts);
-                $mform->addHelpButton('customint5', 'cohortonly', 'enrol_conditional');
-            } else {
-                $mform->addElement('hidden', 'customint5');
-                $mform->setType('customint5', PARAM_INT);
-                $mform->setConstant('customint5', 0);
-            }
         }
 
         // Conditions for self enrolment.
@@ -1345,7 +1289,6 @@ class enrol_conditional_plugin extends enrol_plugin {
             'customint2' => $validlongtimenosee,
             'customint3' => PARAM_INT,
             'customint4' => PARAM_INT,
-            'customint5' => PARAM_INT,
             'customint6' => $validnewenrols,
             'conditionaction' => array_keys($this->get_condition_action_options()),
             'conditionreactivate' => [0, 1],

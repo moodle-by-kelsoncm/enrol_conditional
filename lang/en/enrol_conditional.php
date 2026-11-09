@@ -45,9 +45,6 @@ $string['checkmodes_help'] = 'The conditions are always checked when a user enro
 * When something the conditions depend on changes, for example the user profile or a cohort membership. Each condition type declares the events it depends on.
 
 When a re-check finds that the conditions are no longer met, the action below is applied.';
-$string['cohortnonmemberinfo'] = 'Only members of cohort \'{$a}\' can self-enrol.';
-$string['cohortonly'] = 'Only cohort members';
-$string['cohortonly_help'] = 'Self enrolment may be restricted to members of a specified cohort only. Note that changing this setting has no effect on existing enrolments.';
 $string['conditionaction'] = 'When the conditions are no longer met';
 $string['conditionaction_desc'] = 'Default action when a re-check finds that an enrolled user no longer meets the conditions.';
 $string['conditionaction_help'] = 'What happens to an existing enrolment when a re-check finds that the user no longer meets the conditions.

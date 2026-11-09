@@ -145,7 +145,9 @@ class enforcer {
      * @return array [sql where, params] over the alias e.
      */
     protected static function instances_in_mode_sql(int $mode): array {
-        global $DB;
+        global $CFG, $DB;
+        // Static callers (observers) may run before the plugin library is loaded.
+        require_once($CFG->dirroot . '/enrol/conditional/lib.php');
         $where = "e.enrol = :enrolname AND e.status = :enabled AND " .
             $DB->sql_bitand('e.' . enrol_conditional_plugin::FIELD_CHECKMODES, $mode) . " <> 0";
         return [$where, ['enrolname' => 'conditional', 'enabled' => ENROL_INSTANCE_ENABLED]];

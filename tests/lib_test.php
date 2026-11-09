@@ -712,17 +712,21 @@ final class lib_test extends \advanced_testcase {
         $DB->update_record('enrol', $instance4);
         $selfplugin->update_status($instance4, ENROL_INSTANCE_DISABLED);
 
-        // Cohort member test.
+        // Cohort member test, with the cohort condition.
         $instance5 = $DB->get_record('enrol', ['courseid' => $course5->id, 'enrol' => 'conditional'], '*', MUST_EXIST);
         $instance5->customint6 = 1;
-        $instance5->customint5 = $cohort1->id;
+        $instance5->customtext2 = json_encode(['op' => 'and', 'children' => [
+            ['type' => 'cohort', 'config' => ['cohortid' => (int) $cohort1->id]],
+        ]]);
         $DB->update_record('enrol', $instance1);
         $selfplugin->update_status($instance5, ENROL_INSTANCE_ENABLED);
 
         $id = $selfplugin->add_instance($course5, $selfplugin->get_instance_defaults());
         $instance6 = $DB->get_record('enrol', ['id' => $id], '*', MUST_EXIST);
         $instance6->customint6 = 1;
-        $instance6->customint5 = $cohort2->id;
+        $instance6->customtext2 = json_encode(['op' => 'and', 'children' => [
+            ['type' => 'cohort', 'config' => ['cohortid' => (int) $cohort2->id]],
+        ]]);
         $DB->update_record('enrol', $instance1);
         $selfplugin->update_status($instance6, ENROL_INSTANCE_ENABLED);
 
@@ -950,14 +954,17 @@ final class lib_test extends \advanced_testcase {
         require_once("$CFG->dirroot/cohort/lib.php");
         cohort_add_member($cohort1->id, $user2->id);
 
-        // Cohort test.
-        $instance->customint5 = $cohort1->id;
+        // Cohort test, with the cohort condition.
+        $instance->customtext2 = json_encode(['op' => 'and', 'children' => [
+            ['type' => 'cohort', 'config' => ['cohortid' => (int) $cohort1->id]],
+        ]]);
         $DB->update_record('enrol', $instance);
-        $error = get_string('cohortnonmemberinfo', 'enrol_conditional', $cohort1->name);
+        $error = get_string('desc', 'enrolcond_cohort', $cohort1->name);
         $this->setUser($user1);
         $this->assertStringContainsString($error, $selfplugin->is_self_enrol_available($instance));
+        // Guests are refused by can_self_enrol() before the conditions are checked.
         $this->setGuestUser();
-        $this->assertStringContainsString($error, $selfplugin->is_self_enrol_available($instance));
+        $this->assertTrue($selfplugin->is_self_enrol_available($instance));
         $this->setUser($user2);
         $this->assertEquals($canntenrolerror, $selfplugin->is_self_enrol_available($instance));
     }

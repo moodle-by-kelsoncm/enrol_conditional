@@ -65,5 +65,30 @@ function xmldb_enrol_conditional_upgrade(int $oldversion): bool {
         upgrade_plugin_savepoint(true, 2026110901, 'enrol', 'conditional');
     }
 
+    if ($oldversion < 2026110902) {
+        // The cohort restriction copied from enrol_self (customint5) becomes a cohort condition (enrolcond_cohort),
+        // required together with the existing conditions. -1 marked an unknown cohort and keeps blocking.
+        $flags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE;
+        $instances = $DB->get_recordset_select('enrol', "enrol = 'conditional' AND customint5 <> 0");
+        foreach ($instances as $instance) {
+            $cohort = ['type' => 'cohort', 'negate' => false, 'config' => ['cohortid' => max(0, (int) $instance->customint5)]];
+            $tree = json_decode((string) $instance->customtext2, true);
+            if (!is_array($tree) || empty($tree['children'])) {
+                $tree = ['op' => 'and', 'negate' => false, 'children' => [$cohort]];
+            } else if (($tree['op'] ?? '') === 'and' && empty($tree['negate'])) {
+                $tree['children'][] = $cohort;
+            } else {
+                $tree = ['op' => 'and', 'negate' => false, 'children' => [$tree, $cohort]];
+            }
+            $DB->update_record('enrol', (object) [
+                'id' => $instance->id,
+                'customint5' => 0,
+                'customtext2' => json_encode($tree, $flags),
+            ]);
+        }
+        $instances->close();
+        upgrade_plugin_savepoint(true, 2026110902, 'enrol', 'conditional');
+    }
+
     return true;
 }

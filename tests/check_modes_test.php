@@ -278,6 +278,27 @@ final class check_modes_test extends \advanced_testcase {
         $this->assertSame(ENROL_USER_ACTIVE, $this->ue_status($instance, $user->id));
     }
 
+    public function test_cohort_condition_on_events(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/cohort/lib.php');
+        $user = $this->getDataGenerator()->create_user();
+        $cohort = $this->getDataGenerator()->create_cohort();
+        cohort_add_member($cohort->id, $user->id);
+        $instance = $this->create_instance(['checkmodeevents']);
+        $tree = json_encode(['op' => 'and', 'children' => [
+            ['type' => 'cohort', 'config' => ['cohortid' => (int) $cohort->id]],
+        ]]);
+        $this->plugin->update_instance($instance, (object) ['customtext2' => $tree, 'expirynotify' => 0]);
+        $instance = $DB->get_record('enrol', ['id' => $instance->id]);
+        $this->plugin->enrol_user($instance, $user->id);
+
+        cohort_remove_member($cohort->id, $user->id);
+        $this->assertSame(ENROL_USER_SUSPENDED, $this->ue_status($instance, $user->id));
+
+        cohort_add_member($cohort->id, $user->id);
+        $this->assertSame(ENROL_USER_ACTIVE, $this->ue_status($instance, $user->id));
+    }
+
     public function test_events_reactivate(): void {
         global $DB;
         $user = $this->getDataGenerator()->create_user();

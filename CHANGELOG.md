@@ -12,4 +12,5 @@ All notable changes to the Conditional self enrolment plugin will be documented 
 - Action when a re-check finds that the conditions are no longer met: nothing (logged once per episode), suspend (default) or remove, plus automatic reactivation. Stored in `customint8` (action, plus 16 to reactivate).
 - Table `enrol_conditional_state`: the plugin only reactivates enrolments that it suspended itself and that nobody changed since. Unknown results never suspend nor reactivate.
 - Events `user_enrolment_suspended`, `user_enrolment_reactivated` and `conditions_not_met`.
+- The cohort restriction of `enrol_self` (`customint5`) was removed in favour of the `enrolcond_cohort` condition. The upgrade adds a cohort condition to the tree of instances that used it.
 - Check modes per instance in `customint7` (bitmask): at enrolment (always), at login (`sync_user_enrolments`), periodically (scheduled task `check_conditions`, in batches of `checkbatchsize` that resume where the previous run stopped) and on the events observed by the conditions (catch-all observer with a cached map).
