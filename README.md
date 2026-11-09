@@ -12,7 +12,7 @@ Requires [`local_enrolconditions`](https://github.com/moodle-by-kelsoncm/local_e
 
 Install: copy `local_enrolconditions` to `public/local/enrolconditions` and this repository to `public/enrol/conditional`, then visit *Site administration > Notifications*.
 
-> Status: under development. The conditions are not implemented yet.
+Conditions included: date, profile field, cohort, completed course, typed list of usernames, file of usernames and lists defined by administrators as SQL queries. Existing enrolments can be checked again and suspended (default), removed or only logged; the plugin only reactivates the suspensions it made itself.
 
 ## Português (Brasil)
 
@@ -22,7 +22,7 @@ Requer o [`local_enrolconditions`](https://github.com/moodle-by-kelsoncm/local_e
 
 Instalação: copie o `local_enrolconditions` para `public/local/enrolconditions` e este repositório para `public/enrol/conditional`, depois acesse *Administração do site > Notificações*.
 
-> Situação: em desenvolvimento. As condições ainda não estão implementadas.
+Condições incluídas: data, campo de perfil, coorte, curso concluído, lista digitada de usernames, arquivo de usernames e listas definidas pelo administrador como consultas SQL. As inscrições existentes podem ser reavaliadas e suspensas (padrão), removidas ou só registradas; o plugin só reativa as suspensões que ele mesmo fez.
 
 ## Development / Desenvolvimento
 

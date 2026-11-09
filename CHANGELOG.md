@@ -2,7 +2,7 @@
 
 All notable changes to the Conditional self enrolment plugin will be documented in this file.
 
-## 0.1.0 - Unreleased
+## 1.0.0 - 2026-11-09
 
 ### Added
 - Plugin skeleton copied from `enrol_self` of Moodle 5.3 (`MOODLE_503_STABLE`, version 2026100500), renamed to `enrol_conditional`.
