@@ -156,6 +156,30 @@ final class backup_restore_test extends \advanced_testcase {
         $this->assertSame(enforcer::OUTCOME_REACTIVATED, $outcome);
     }
 
+    public function test_file_of_usernames(): void {
+        global $DB, $USER;
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user(['username' => 'listed']);
+        $fileid = 4242;
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_course::instance($course->id)->id,
+            'component' => 'enrolcond_userfile',
+            'filearea' => 'usernames',
+            'itemid' => $fileid,
+            'filepath' => '/',
+            'filename' => 'list.csv',
+        ], "listed\n");
+        $tree = json_encode(['op' => 'and', 'children' => [
+            ['type' => 'userfile', 'config' => ['fileid' => $fileid, 'filename' => 'list.csv', 'count' => 1]],
+        ]]);
+        $this->plugin->add_instance($course, ['status' => ENROL_INSTANCE_ENABLED, 'customtext2' => $tree]);
+
+        $newcourseid = $this->backup_and_restore((int) $course->id, true);
+        $restored = $DB->get_record('enrol', ['courseid' => $newcourseid, 'enrol' => 'conditional'], '*', MUST_EXIST);
+        $result = $this->plugin->evaluate_conditions($restored, (int) $user->id);
+        $this->assertTrue($result->is_met());
+    }
+
     public function test_other_site(): void {
         global $DB;
         [$course, , $suspended, $active] = $this->create_course();

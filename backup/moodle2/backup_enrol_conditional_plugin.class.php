@@ -44,6 +44,13 @@ class backup_enrol_conditional_plugin extends backup_enrol_plugin {
         $plugin->add_child($states);
         $states->add_child($state);
 
+        // Files of usernames of the enrolcond_userfile conditions, needed by the condition tree. File annotations
+        // are only processed on elements with a source, hence this element with a single row.
+        $userfiles = new backup_nested_element('userfiles', ['id'], []);
+        $plugin->add_child($userfiles);
+        $userfiles->set_source_array([['id' => 1]]);
+        $userfiles->annotate_files('enrolcond_userfile', 'usernames', null, $this->task->get_contextid());
+
         if ($this->task->get_setting_value('users')) {
             $state->set_source_sql(
                 "SELECT s.id, ue.userid, s.action, s.reason, s.timesuspended

@@ -47,6 +47,13 @@ class restore_enrol_conditional_plugin extends restore_enrol_plugin {
     }
 
     /**
+     * Restores the files of usernames, keeping their item ids, which the condition trees refer to.
+     */
+    public function after_execute_enrol() {
+        $this->add_related_files('enrolcond_userfile', 'usernames', null);
+    }
+
+    /**
      * Restores one state record. User enrolments come before it in the backup.
      *
      * @param array|stdClass $data
