@@ -156,7 +156,9 @@ class enrol_form extends dynamic_form {
         }
         $canselfenrol = $this->get_plugin()->can_self_enrol($instance);
         if ($canselfenrol !== true) {
-            throw new \moodle_exception($canselfenrol);
+            // The reason may be HTML (for example the list of conditions not met), so it goes as a parameter.
+            $reason = html_to_text((string) $canselfenrol, 0, false);
+            throw new \moodle_exception('cannotenrolreason', 'enrol_conditional', '', $reason);
         }
         if (!$instance->password) {
             throw new \moodle_exception('nopassword', 'enrol_conditional');

@@ -220,6 +220,12 @@ class enrol_conditional_plugin extends enrol_plugin {
     public function enrol_conditional(stdClass $instance, $data = null) {
         global $DB, $USER, $CFG;
 
+        // Every caller checks can_self_enrol() first; check the conditions again in case one does not.
+        $result = $this->evaluate_conditions($instance, (int) $USER->id);
+        if ($result !== null && !$result->is_met()) {
+            throw new moodle_exception('conditionsnotmetshort', 'enrol_conditional');
+        }
+
         // Don't enrol user if password is not passed when required.
         if ($instance->password && !isset($data->enrolpassword)) {
             return;
@@ -399,7 +405,52 @@ class enrol_conditional_plugin extends enrol_plugin {
             }
         }
 
+        // Conditions are checked for logged in users only; guests are refused by can_self_enrol().
+        if (isloggedin() && !isguestuser()) {
+            $result = $this->evaluate_conditions($instance, (int) $USER->id);
+            if ($result !== null && !$result->is_met()) {
+                return $this->render_condition_failures($result);
+            }
+        }
+
         return true;
+    }
+
+    /**
+     * Evaluates the conditions of an instance for a user.
+     *
+     * A stored tree that is no longer valid counts as unknown, so it refuses new enrolments.
+     *
+     * @param stdClass $instance Enrolment instance.
+     * @param int $userid
+     * @return \local_enrolconditions\tree_result|null Null when the instance has no conditions.
+     */
+    public function evaluate_conditions(stdClass $instance, int $userid): ?\local_enrolconditions\tree_result {
+        try {
+            $tree = \local_enrolconditions\tree::from_json($instance->{self::FIELD_CONDITIONS} ?? null);
+        } catch (\local_enrolconditions\invalid_tree_exception $e) {
+            debugging("Invalid condition tree in enrolment instance {$instance->id}: " . $e->getMessage(), DEBUG_DEVELOPER);
+            return new \local_enrolconditions\tree_result(null, [[
+                'message' => get_string('failureunknown', 'local_enrolconditions'),
+                'children' => [],
+            ]]);
+        }
+        if ($tree->is_empty()) {
+            return null;
+        }
+        return $tree->evaluate($userid, $instance);
+    }
+
+    /**
+     * HTML that explains which conditions the user does not meet.
+     *
+     * @param \local_enrolconditions\tree_result $result
+     * @return string
+     */
+    protected function render_condition_failures(\local_enrolconditions\tree_result $result): string {
+        global $OUTPUT;
+        $failures = new \local_enrolconditions\output\failures($result, get_string('conditionsnotmet', 'enrol_conditional'));
+        return $OUTPUT->render($failures);
     }
 
     /**

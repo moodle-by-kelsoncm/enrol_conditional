@@ -223,7 +223,7 @@ class enrol_conditional_external extends external_api {
                     'item' => 'instance',
                     'itemid' => $instance->id,
                     'warningcode' => '1',
-                    'message' => $enrolstatus,
+                    'message' => html_to_text((string) $enrolstatus, 0, false),
                 ];
             }
         }

@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['cannotenrolreason'] = 'You cannot enrol yourself in this course: {$a}';
 $string['canntenrol'] = 'Enrolment is disabled or inactive';
 $string['canntenrolearly'] = 'You cannot enrol yet; enrolment starts on {$a}.';
 $string['canntenrollate'] = 'You cannot enrol any more, since enrolment ended on {$a}.';
@@ -36,6 +37,8 @@ $string['conditional:unenrol'] = 'Unenrol users from course';
 $string['conditional:unenrolself'] = 'Unenrol self from the course';
 $string['conditions'] = 'Conditions';
 $string['conditions_help'] = 'Users can only self enrol when they meet these conditions. Combine conditions in groups that require all or any of their items, and mark a condition or group as "Must not be met" to invert it. Without conditions, anybody who can self enrol is accepted.';
+$string['conditionsnotmet'] = 'You cannot enrol yourself in this course because:';
+$string['conditionsnotmetshort'] = 'You do not meet the conditions to enrol yourself in this course.';
 $string['confirmbulkdeleteenrolment'] = 'Are you sure you want to delete these user enrolments?';
 $string['defaultrole'] = 'Default role assignment';
 $string['defaultrole_desc'] = 'Select role which should be assigned to users during self enrolment';
