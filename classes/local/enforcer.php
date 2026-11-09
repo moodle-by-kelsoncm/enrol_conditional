@@ -139,6 +139,135 @@ class enforcer {
     }
 
     /**
+     * SQL that selects enabled conditional instances with a check mode.
+     *
+     * @param int $mode One of the CHECK_ constants.
+     * @return array [sql where, params] over the alias e.
+     */
+    protected static function instances_in_mode_sql(int $mode): array {
+        global $DB;
+        $where = "e.enrol = :enrolname AND e.status = :enabled AND " .
+            $DB->sql_bitand('e.' . enrol_conditional_plugin::FIELD_CHECKMODES, $mode) . " <> 0";
+        return [$where, ['enrolname' => 'conditional', 'enabled' => ENROL_INSTANCE_ENABLED]];
+    }
+
+    /**
+     * Re-checks the enrolments of a user in the instances that use a check mode.
+     *
+     * @param int $userid
+     * @param int $mode One of the CHECK_ constants.
+     * @return string[] Outcome by user enrolment id.
+     */
+    public function check_user_in_mode(int $userid, int $mode): array {
+        global $DB;
+        [$where, $params] = self::instances_in_mode_sql($mode);
+        $instances = $DB->get_records_sql(
+            "SELECT e.* FROM {enrol} e JOIN {user_enrolments} ue ON ue.enrolid = e.id
+              WHERE $where AND ue.userid = :userid",
+            $params + ['userid' => $userid]
+        );
+        return $this->check_user_in_instances($userid, array_keys($instances), $instances);
+    }
+
+    /**
+     * Re-checks the enrolments of a user in some instances.
+     *
+     * @param int $userid
+     * @param int[] $instanceids
+     * @param stdClass[] $instances Instance records already loaded, by id.
+     * @return string[] Outcome by user enrolment id.
+     */
+    public function check_user_in_instances(int $userid, array $instanceids, array $instances = []): array {
+        global $DB;
+        if (!$instanceids) {
+            return [];
+        }
+        [$insql, $params] = $DB->get_in_or_equal($instanceids, SQL_PARAMS_NAMED);
+        $ues = $DB->get_records_select('user_enrolments', "userid = :userid AND enrolid $insql", $params + ['userid' => $userid]);
+        $outcomes = [];
+        foreach ($ues as $ue) {
+            $instance = $instances[$ue->enrolid] ?? $DB->get_record('enrol', ['id' => $ue->enrolid]);
+            if ($instance) {
+                $outcomes[$ue->id] = $this->check_user_enrolment($instance, $ue);
+            }
+        }
+        return $outcomes;
+    }
+
+    /**
+     * Re-checks the next batch of enrolments of the instances with CHECK_PERIODIC.
+     *
+     * The position is kept between runs, so each run continues where the previous one stopped and the
+     * cycle starts again after the last enrolment.
+     *
+     * @param int $limit Maximum number of enrolments.
+     * @param \progress_trace|null $trace
+     * @return string[] Outcome by user enrolment id.
+     */
+    public function check_batch(int $limit, ?\progress_trace $trace = null): array {
+        global $DB;
+        $limit = max(1, $limit);
+        $cursor = (int) get_config('enrol_conditional', 'periodiccursor');
+        [$where, $params] = self::instances_in_mode_sql(enrol_conditional_plugin::CHECK_PERIODIC);
+        $ues = $DB->get_records_sql(
+            "SELECT ue.* FROM {user_enrolments} ue JOIN {enrol} e ON e.id = ue.enrolid
+              WHERE $where AND ue.id > :cursor
+           ORDER BY ue.id ASC",
+            $params + ['cursor' => $cursor],
+            0,
+            $limit
+        );
+        $instances = [];
+        $outcomes = [];
+        foreach ($ues as $ue) {
+            if (!isset($instances[$ue->enrolid])) {
+                $instances[$ue->enrolid] = $DB->get_record('enrol', ['id' => $ue->enrolid], '*', MUST_EXIST);
+            }
+            $outcome = $this->check_user_enrolment($instances[$ue->enrolid], $ue);
+            $outcomes[$ue->id] = $outcome;
+            if ($trace && $outcome !== self::OUTCOME_NOTHING) {
+                $trace->output("User enrolment {$ue->id} (user {$ue->userid}, instance {$ue->enrolid}): {$outcome}");
+            }
+            $cursor = (int) $ue->id;
+        }
+        // A short batch means the cycle reached the end.
+        set_config('periodiccursor', count($ues) < $limit ? 0 : $cursor, 'enrol_conditional');
+        return $outcomes;
+    }
+
+    /**
+     * Events observed by the instances with CHECK_EVENTS.
+     *
+     * @return array Instance ids by event class name, without the leading backslash.
+     */
+    public static function get_event_map(): array {
+        global $DB;
+        $cache = \cache::make('enrol_conditional', 'observedevents');
+        $map = $cache->get('map');
+        if ($map !== false) {
+            return $map;
+        }
+        [$where, $params] = self::instances_in_mode_sql(enrol_conditional_plugin::CHECK_EVENTS);
+        $instances = $DB->get_records_sql(
+            "SELECT e.id, e." . enrol_conditional_plugin::FIELD_CONDITIONS . " AS tree FROM {enrol} e WHERE $where",
+            $params
+        );
+        $map = [];
+        foreach ($instances as $instance) {
+            try {
+                $tree = \local_enrolconditions\tree::from_json($instance->tree);
+            } catch (\local_enrolconditions\invalid_tree_exception $e) {
+                continue;
+            }
+            foreach ($tree->get_observed_events() as $eventname) {
+                $map[ltrim($eventname, '\\')][] = (int) $instance->id;
+            }
+        }
+        $cache->set('map', $map);
+        return $map;
+    }
+
+    /**
      * Open state record of a user enrolment.
      *
      * @param int $ueid

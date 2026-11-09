@@ -76,6 +76,14 @@ if ($ADMIN->fulltree) {
         $options
     ));
 
+    $settings->add(new admin_setting_configtext(
+        'enrol_conditional/checkbatchsize',
+        get_string('checkbatchsize', 'enrol_conditional'),
+        get_string('checkbatchsize_desc', 'enrol_conditional'),
+        500,
+        PARAM_INT
+    ));
+
     // Enrol instance defaults.
     $settings->add(new admin_setting_heading(
         'enrol_conditional_defaults',
@@ -127,6 +135,15 @@ if ($ADMIN->fulltree) {
         get_string('conditionreactivate_desc', 'enrol_conditional'),
         1
     ));
+
+    foreach (['checkmodelogin', 'checkmodeperiodic', 'checkmodeevents'] as $checkmode) {
+        $settings->add(new admin_setting_configcheckbox(
+            'enrol_conditional/' . $checkmode,
+            get_string($checkmode, 'enrol_conditional'),
+            get_string($checkmode . '_desc', 'enrol_conditional'),
+            0
+        ));
+    }
 
     $options = [1  => get_string('yes'),
                      0 => get_string('no')];

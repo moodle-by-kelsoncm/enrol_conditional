@@ -26,6 +26,25 @@ $string['cannotenrolreason'] = 'You cannot enrol yourself in this course: {$a}';
 $string['canntenrol'] = 'Enrolment is disabled or inactive';
 $string['canntenrolearly'] = 'You cannot enrol yet; enrolment starts on {$a}.';
 $string['canntenrollate'] = 'You cannot enrol any more, since enrolment ended on {$a}.';
+$string['cachedef_observedevents'] = 'Events observed by the conditions of the instances that re-check on events';
+$string['checkbatchsize'] = 'Enrolments per periodic check';
+$string['checkbatchsize_desc'] = 'Maximum number of enrolments re-checked by each run of the scheduled task. The next run continues where the previous one stopped.';
+$string['checkconditionstask'] = 'Re-check the conditions of conditional self enrolments';
+$string['checkmodeenrol'] = 'When the user enrols (always)';
+$string['checkmodeevents'] = 'When something the conditions depend on changes';
+$string['checkmodeevents_desc'] = 'Re-check by default when an event observed by the conditions happens.';
+$string['checkmodelogin'] = 'When the user logs in';
+$string['checkmodelogin_desc'] = 'Re-check by default the enrolments of users when they log in.';
+$string['checkmodeperiodic'] = 'Periodically, in the scheduled task';
+$string['checkmodeperiodic_desc'] = 'Re-check by default the enrolments in the scheduled task.';
+$string['checkmodes'] = 'Check the conditions';
+$string['checkmodes_help'] = 'The conditions are always checked when a user enrols. Existing enrolments can also be re-checked:
+
+* When the user logs in.
+* Periodically, by the scheduled task, in batches.
+* When something the conditions depend on changes, for example the user profile or a cohort membership. Each condition type declares the events it depends on.
+
+When a re-check finds that the conditions are no longer met, the action below is applied.';
 $string['cohortnonmemberinfo'] = 'Only members of cohort \'{$a}\' can self-enrol.';
 $string['cohortonly'] = 'Only cohort members';
 $string['cohortonly_help'] = 'Self enrolment may be restricted to members of a specified cohort only. Note that changing this setting has no effect on existing enrolments.';

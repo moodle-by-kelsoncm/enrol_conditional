@@ -54,5 +54,16 @@ function xmldb_enrol_conditional_upgrade(int $oldversion): bool {
         upgrade_plugin_savepoint(true, 2026110900, 'enrol', 'conditional');
     }
 
+    if ($oldversion < 2026110901) {
+        // Existing instances only checked the conditions at enrolment; the action comes from the site defaults.
+        $action = get_config('enrol_conditional', 'conditionaction');
+        $action = ($action === false ? 1 : (int) $action) & 15;
+        $reactivate = get_config('enrol_conditional', 'conditionreactivate');
+        $action |= ($reactivate === false || $reactivate) ? 16 : 0;
+        $DB->set_field_select('enrol', 'customint7', 1, "enrol = 'conditional' AND customint7 IS NULL");
+        $DB->set_field_select('enrol', 'customint8', $action, "enrol = 'conditional' AND customint8 IS NULL");
+        upgrade_plugin_savepoint(true, 2026110901, 'enrol', 'conditional');
+    }
+
     return true;
 }

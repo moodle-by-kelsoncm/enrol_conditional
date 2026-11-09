@@ -52,6 +52,28 @@ class enrol_conditional_plugin extends enrol_plugin {
     /** @var int Bit of FIELD_ACTION: reactivate enrolments suspended by the plugin when the conditions are met again. */
     public const FLAG_REACTIVATE = 16;
 
+    /** @var string Column with the bitmask of when the conditions are checked. */
+    public const FIELD_CHECKMODES = 'customint7';
+
+    /** @var int Check when the user enrols (always on). */
+    public const CHECK_ENROL = 1;
+
+    /** @var int Re-check when the user logs in. */
+    public const CHECK_LOGIN = 2;
+
+    /** @var int Re-check in the scheduled task. */
+    public const CHECK_PERIODIC = 4;
+
+    /** @var int Re-check when an event observed by the conditions happens. */
+    public const CHECK_EVENTS = 8;
+
+    /** @var array Form field of each optional check mode. */
+    public const CHECK_MODE_FIELDS = [
+        'checkmodelogin' => self::CHECK_LOGIN,
+        'checkmodeperiodic' => self::CHECK_PERIODIC,
+        'checkmodeevents' => self::CHECK_EVENTS,
+    ];
+
     /** @var stdClass|null Last enroller found by get_enroller(). */
     protected $lasternoller = null;
     /** @var int Instance id of the last enroller found by get_enroller(). */
@@ -541,6 +563,7 @@ class enrol_conditional_plugin extends enrol_plugin {
         $fields['customint5']      = 0;
         $fields['customint6']      = $this->get_config('newenrols');
         $fields[self::FIELD_ACTION] = self::get_action_field(null);
+        $fields[self::FIELD_CHECKMODES] = self::get_default_check_modes();
 
         return $fields;
     }
@@ -878,6 +901,20 @@ class enrol_conditional_plugin extends enrol_plugin {
         parent::delete_instance($instance);
         // The observer removes the records of each unenrolled user; this catches anything left.
         $DB->delete_records(\enrol_conditional\local\enforcer::TABLE, ['instanceid' => $instance->id]);
+        $this->purge_event_map();
+    }
+
+    /**
+     * Re-checks the enrolments of a user that logs in, in the instances with CHECK_LOGIN.
+     *
+     * @param stdClass $user
+     * @return void
+     */
+    public function sync_user_enrolments($user) {
+        if (empty($user->id) || isguestuser($user)) {
+            return;
+        }
+        (new \enrol_conditional\local\enforcer($this))->check_user_in_mode((int) $user->id, self::CHECK_LOGIN);
     }
 
     /**
@@ -1145,6 +1182,19 @@ class enrol_conditional_plugin extends enrol_plugin {
             $mform->addElement('advcheckbox', 'conditionreactivate', get_string('conditionreactivate', 'enrol_conditional'));
             $mform->addHelpButton('conditionreactivate', 'conditionreactivate', 'enrol_conditional');
             $mform->setDefault('conditionreactivate', (int) self::get_reactivate($instance));
+
+            $modes = self::get_check_modes($instance);
+            $elements = [
+                $mform->createElement('static', 'checkmodeenrol', '', get_string('checkmodeenrol', 'enrol_conditional')),
+            ];
+            foreach (array_keys(self::CHECK_MODE_FIELDS) as $name) {
+                $elements[] = $mform->createElement('advcheckbox', $name, '', get_string($name, 'enrol_conditional'));
+            }
+            $mform->addGroup($elements, 'checkmodes', get_string('checkmodes', 'enrol_conditional'), '<br>', false);
+            $mform->addHelpButton('checkmodes', 'checkmodes', 'enrol_conditional');
+            foreach (self::CHECK_MODE_FIELDS as $name => $bit) {
+                $mform->setDefault($name, (int) (($modes & $bit) === $bit));
+            }
         }
 
         // Course welcome message.
@@ -1299,6 +1349,9 @@ class enrol_conditional_plugin extends enrol_plugin {
             'customint6' => $validnewenrols,
             'conditionaction' => array_keys($this->get_condition_action_options()),
             'conditionreactivate' => [0, 1],
+            'checkmodelogin' => [0, 1],
+            'checkmodeperiodic' => [0, 1],
+            'checkmodeevents' => [0, 1],
             'status' => $validstatus,
             'enrolperiod' => PARAM_INT,
             'expirynotify' => $validexpirynotify,
@@ -1421,6 +1474,73 @@ class enrol_conditional_plugin extends enrol_plugin {
     }
 
     /**
+     * Site default of FIELD_CHECKMODES.
+     *
+     * @return int
+     */
+    public static function get_default_check_modes(): int {
+        $modes = self::CHECK_ENROL;
+        foreach (self::CHECK_MODE_FIELDS as $name => $bit) {
+            if (get_config('enrol_conditional', $name)) {
+                $modes |= $bit;
+            }
+        }
+        return $modes;
+    }
+
+    /**
+     * When the conditions of the instance are checked.
+     *
+     * @param stdClass|null $instance
+     * @return int Bitmask of CHECK_ constants; CHECK_ENROL is always set.
+     */
+    public static function get_check_modes(?stdClass $instance): int {
+        if ($instance !== null && isset($instance->{self::FIELD_CHECKMODES})) {
+            return ((int) $instance->{self::FIELD_CHECKMODES}) | self::CHECK_ENROL;
+        }
+        return self::get_default_check_modes();
+    }
+
+    /**
+     * Whether the instance checks its conditions in a mode.
+     *
+     * @param stdClass $instance
+     * @param int $mode One of the CHECK_ constants.
+     * @return bool
+     */
+    public static function has_check_mode(stdClass $instance, int $mode): bool {
+        return (self::get_check_modes($instance) & $mode) === $mode;
+    }
+
+    /**
+     * Moves the form fields checkmode* into FIELD_CHECKMODES.
+     *
+     * @param array $fields Instance fields, changed in place.
+     * @param stdClass|null $instance Current instance, for the values not sent.
+     */
+    protected function merge_check_mode_fields(array &$fields, ?stdClass $instance): void {
+        $sent = array_intersect_key($fields, self::CHECK_MODE_FIELDS);
+        if (!$sent) {
+            return;
+        }
+        $modes = self::get_check_modes($instance);
+        foreach (self::CHECK_MODE_FIELDS as $name => $bit) {
+            if (array_key_exists($name, $fields)) {
+                $modes = empty($fields[$name]) ? ($modes & ~$bit) : ($modes | $bit);
+                unset($fields[$name]);
+            }
+        }
+        $fields[self::FIELD_CHECKMODES] = $modes | self::CHECK_ENROL;
+    }
+
+    /**
+     * Forgets the cached map of observed events, after an instance changed.
+     */
+    protected function purge_event_map(): void {
+        \cache::make('enrol_conditional', 'observedevents')->purge();
+    }
+
+    /**
      * Moves the form fields conditionaction and conditionreactivate into FIELD_ACTION.
      *
      * @param array $fields Instance fields, changed in place.
@@ -1463,8 +1583,12 @@ class enrol_conditional_plugin extends enrol_plugin {
         if (!isset($fields[self::FIELD_ACTION])) {
             $fields[self::FIELD_ACTION] = self::get_action_field(null);
         }
+        $this->merge_check_mode_fields($fields, null);
+        $fields[self::FIELD_CHECKMODES] = self::get_check_modes((object) $fields);
 
-        return parent::add_instance($course, $fields);
+        $id = parent::add_instance($course, $fields);
+        $this->purge_event_map();
+        return $id;
     }
 
     /**
@@ -1498,9 +1622,24 @@ class enrol_conditional_plugin extends enrol_plugin {
         }
         $fields = (array) $data;
         $this->merge_action_fields($fields, $instance);
+        $this->merge_check_mode_fields($fields, $instance);
         $data = (object) $fields;
 
-        return parent::update_instance($instance, $data);
+        $result = parent::update_instance($instance, $data);
+        $this->purge_event_map();
+        return $result;
+    }
+
+    /**
+     * Enables or disables the instance.
+     *
+     * @param stdClass $instance
+     * @param int $newstatus ENROL_INSTANCE_ENABLED or ENROL_INSTANCE_DISABLED.
+     * @return void
+     */
+    public function update_status($instance, $newstatus) {
+        parent::update_status($instance, $newstatus);
+        $this->purge_event_map();
     }
 
     /**

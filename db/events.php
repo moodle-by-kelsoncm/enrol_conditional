@@ -33,4 +33,9 @@ $observers = [
         'eventname' => '\core\event\user_enrolment_deleted',
         'callback' => '\enrol_conditional\observer::user_enrolment_deleted',
     ],
+    [
+        // Re-check on the events observed by the conditions (check mode "events").
+        'eventname' => '*',
+        'callback' => '\enrol_conditional\observer::any_event',
+    ],
 ];

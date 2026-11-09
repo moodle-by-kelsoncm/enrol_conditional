@@ -26,6 +26,41 @@ use enrol_conditional\local\enforcer;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
+    /** @var bool[] Users being re-checked by any_event(), to avoid loops. */
+    protected static array $running = [];
+
+    /**
+     * Re-checks the enrolments of the user of an event observed by the conditions (CHECK_EVENTS).
+     *
+     * Observes every event, so it returns early unless the event is in the cached map.
+     *
+     * @param \core\event\base $event
+     */
+    public static function any_event(\core\event\base $event): void {
+        global $CFG;
+        if (
+            !empty($CFG->upgraderunning) || during_initial_install() || enforcer::is_acting()
+                || !enrol_is_enabled('conditional')
+        ) {
+            return;
+        }
+        $map = enforcer::get_event_map();
+        $instanceids = $map[ltrim($event->eventname, '\\')] ?? [];
+        if (!$instanceids) {
+            return;
+        }
+        $userid = (int) ($event->relateduserid ?: $event->userid);
+        if ($userid <= 0 || isguestuser($userid) || !empty(self::$running[$userid])) {
+            return;
+        }
+        self::$running[$userid] = true;
+        try {
+            (new enforcer())->check_user_in_instances($userid, $instanceids);
+        } finally {
+            unset(self::$running[$userid]);
+        }
+    }
+
     /** @var int[] Open suspensions (state id by user enrolment id) that stay owned after the update in progress. */
     protected static array $keep = [];
 
@@ -87,6 +122,11 @@ class observer {
         unset(self::$keep[$ueid]);
         $ue = $DB->get_record('user_enrolments', ['id' => $ueid]);
         foreach (self::open_suspensions($ueid) as $state) {
+            if ($ue && enforcer::owns($state, $ue)) {
+                // Unchanged since the plugin acted: events triggered inside other observers are delivered
+                // later, so this may be the plugin's own suspension.
+                continue;
+            }
             if ($ue && (int) $state->id === $keep && (int) $ue->status === ENROL_USER_SUSPENDED) {
                 $DB->set_field(enforcer::TABLE, 'uetimemodified', $ue->timemodified, ['id' => $state->id]);
             } else {
