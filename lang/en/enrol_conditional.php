@@ -37,7 +37,9 @@ $string['conditionaction_help'] = 'What happens to an existing enrolment when a 
 * Suspend: the enrolment is suspended.
 * Remove: the user is unenrolled. Some user data in the course may be lost.
 
-When the plugin cannot evaluate a condition (for example, its type was uninstalled), it never changes the enrolment.';
+When the plugin cannot evaluate a condition (for example, its type was uninstalled), it never changes the enrolment.
+
+Changing this setting does not undo what was already done: enrolments suspended by the plugin stay suspended until the user meets the conditions again and reactivation is enabled.';
 $string['conditionactionnone'] = 'Nothing (only record it)';
 $string['conditionactionremove'] = 'Remove the enrolment';
 $string['conditionactionsuspend'] = 'Suspend the enrolment';
@@ -49,7 +51,9 @@ $string['conditional:unenrol'] = 'Unenrol users from course';
 $string['conditional:unenrolself'] = 'Unenrol self from the course';
 $string['conditionreactivate'] = 'Reactivate when the conditions are met again';
 $string['conditionreactivate_desc'] = 'Reactivate by default the enrolments suspended by this plugin when the conditions are met again.';
-$string['conditionreactivate_help'] = 'If enabled, enrolments that this plugin suspended are reactivated when the user meets the conditions again. Suspensions made by other people or processes are never reactivated, and neither are enrolments changed by someone else after the plugin suspended them.';
+$string['conditionreactivate_help'] = 'If enabled, enrolments that this plugin suspended are reactivated when the user meets the conditions again. Removing all the conditions counts as meeting them.
+
+Suspensions made by other people or processes are never reactivated. If someone else reactivates an enrolment that the plugin suspended, or changes it directly in the database, the plugin no longer reactivates it. Changing only its dates, while it stays suspended, keeps it.';
 $string['conditions'] = 'Conditions';
 $string['conditions_help'] = 'Users can only self enrol when they meet these conditions. Combine conditions in groups that require all or any of their items, and mark a condition or group as "Must not be met" to invert it. Without conditions, anybody who can self enrol is accepted.';
 $string['conditionsnotmet'] = 'You cannot enrol yourself in this course because:';

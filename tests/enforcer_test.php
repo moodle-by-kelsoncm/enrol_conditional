@@ -275,6 +275,37 @@ final class enforcer_test extends \advanced_testcase {
         $this->assertSame(enforcer::CLOSE_EXTERNAL, $this->states($instance)[0]->closereason);
     }
 
+    public function test_date_change_by_someone_else_keeps_ownership(): void {
+        $instance = $this->create_instance(enrol_conditional_plugin::ACTION_SUSPEND, true, []);
+        $this->enforcer->check_user($instance, $this->user->id);
+
+        // A teacher only extends the enrolment, which stays suspended.
+        $this->waitForSecond();
+        $this->plugin->update_user_enrol($instance, $this->user->id, null, null, time() + WEEKSECS);
+        $state = $this->states($instance)[0];
+        $this->assertNull($state->timeclosed);
+        $this->assertEquals($this->ue($instance)->timemodified, $state->uetimemodified);
+
+        $instance = $this->set_allowed($instance, [$this->user->id]);
+        $this->assertSame(enforcer::OUTCOME_REACTIVATED, $this->enforcer->check_user($instance, $this->user->id));
+    }
+
+    public function test_date_change_after_change_without_event_does_not_restore_ownership(): void {
+        global $DB;
+        $instance = $this->create_instance(enrol_conditional_plugin::ACTION_SUSPEND, true, []);
+        $this->enforcer->check_user($instance, $this->user->id);
+
+        // Another routine changed the record directly, then a teacher changes its dates.
+        $ue = $this->ue($instance);
+        $DB->set_field('user_enrolments', 'timemodified', $ue->timemodified - 10, ['id' => $ue->id]);
+        $this->plugin->update_user_enrol($instance, $this->user->id, null, null, time() + WEEKSECS);
+        $this->assertSame(enforcer::CLOSE_EXTERNAL, $this->states($instance)[0]->closereason);
+
+        $instance = $this->set_allowed($instance, [$this->user->id]);
+        $this->assertSame(enforcer::OUTCOME_NOTHING, $this->enforcer->check_user($instance, $this->user->id));
+        $this->assertEquals(ENROL_USER_SUSPENDED, $this->ue($instance)->status);
+    }
+
     public function test_suspends_again_after_external_reactivation(): void {
         $instance = $this->create_instance(enrol_conditional_plugin::ACTION_SUSPEND, true, []);
         $this->enforcer->check_user($instance, $this->user->id);

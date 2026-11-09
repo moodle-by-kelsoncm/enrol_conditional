@@ -12,7 +12,7 @@
         <FIELD NAME="action" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Action taken: none (only recorded) or suspend."/>
         <FIELD NAME="reason" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Conditions not met, as plain text."/>
         <FIELD NAME="timesuspended" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="When the plugin acted (suspended, or recorded the failure when the action is none)."/>
-        <FIELD NAME="uetimemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="timemodified of the user enrolment right after the plugin acted. A different value means someone else changed the enrolment since."/>
+        <FIELD NAME="uetimemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="timemodified of the user enrolment right after the plugin acted, updated when someone else only changes the dates of a suspended enrolment. A different value means the enrolment was changed without events."/>
         <FIELD NAME="timereactivated" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When the plugin reactivated the enrolment."/>
         <FIELD NAME="timeclosed" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When this record stopped applying. Null while open."/>
         <FIELD NAME="closereason" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="Why it was closed: reactivated, met, external or superseded."/>

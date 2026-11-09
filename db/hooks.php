@@ -29,4 +29,8 @@ $callbacks = [
         'hook' => core_enrol\hook\after_user_enrolled::class,
         'callback' => 'enrol_conditional\user_enrolment_callbacks::send_course_welcome_message',
     ],
+    [
+        'hook' => core_enrol\hook\before_user_enrolment_updated::class,
+        'callback' => 'enrol_conditional\observer::before_user_enrolment_updated',
+    ],
 ];

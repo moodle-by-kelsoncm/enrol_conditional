@@ -26,8 +26,54 @@ use enrol_conditional\local\enforcer;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
+    /** @var int[] Open suspensions (state id by user enrolment id) that stay owned after the update in progress. */
+    protected static array $keep = [];
+
     /**
-     * Someone else changed an enrolment: the plugin no longer owns its suspension.
+     * Open suspensions of a user enrolment.
+     *
+     * @param int $ueid
+     * @return \stdClass[]
+     */
+    protected static function open_suspensions(int $ueid): array {
+        global $DB;
+        return $DB->get_records_select(
+            enforcer::TABLE,
+            'userenrolmentid = :ueid AND action = :action AND timeclosed IS NULL',
+            ['ueid' => $ueid, 'action' => enforcer::STATE_SUSPEND]
+        );
+    }
+
+    /**
+     * Someone else is about to change an enrolment suspended by the plugin.
+     *
+     * The record still has the previous timemodified here. The plugin keeps the suspension only when it still
+     * owned it and the enrolment stays suspended (for example, only its dates change).
+     *
+     * @param \core_enrol\hook\before_user_enrolment_updated $hook
+     */
+    public static function before_user_enrolment_updated(\core_enrol\hook\before_user_enrolment_updated $hook): void {
+        $ue = $hook->userenrolmentinstance;
+        if ($hook->enrolinstance->enrol !== 'conditional' || enforcer::is_acting()) {
+            return;
+        }
+        unset(self::$keep[(int) $ue->id]);
+        foreach (self::open_suspensions((int) $ue->id) as $state) {
+            $stillowned = (int) $ue->status === ENROL_USER_SUSPENDED
+                && (int) $ue->timemodified === (int) $state->uetimemodified;
+            if ($stillowned) {
+                self::$keep[(int) $ue->id] = (int) $state->id;
+            } else {
+                enforcer::close($state, enforcer::CLOSE_EXTERNAL);
+            }
+        }
+    }
+
+    /**
+     * Someone else changed an enrolment suspended by the plugin.
+     *
+     * Suspensions kept by before_user_enrolment_updated() get the new timemodified. Any other open
+     * suspension is no longer owned.
      *
      * @param \core\event\user_enrolment_updated $event
      */
@@ -36,13 +82,16 @@ class observer {
         if (($event->other['enrol'] ?? '') !== 'conditional' || enforcer::is_acting()) {
             return;
         }
-        $states = $DB->get_records_select(
-            enforcer::TABLE,
-            'userenrolmentid = :ueid AND action = :action AND timeclosed IS NULL',
-            ['ueid' => $event->objectid, 'action' => enforcer::STATE_SUSPEND]
-        );
-        foreach ($states as $state) {
-            enforcer::close($state, enforcer::CLOSE_EXTERNAL);
+        $ueid = (int) $event->objectid;
+        $keep = self::$keep[$ueid] ?? null;
+        unset(self::$keep[$ueid]);
+        $ue = $DB->get_record('user_enrolments', ['id' => $ueid]);
+        foreach (self::open_suspensions($ueid) as $state) {
+            if ($ue && (int) $state->id === $keep && (int) $ue->status === ENROL_USER_SUSPENDED) {
+                $DB->set_field(enforcer::TABLE, 'uetimemodified', $ue->timemodified, ['id' => $state->id]);
+            } else {
+                enforcer::close($state, enforcer::CLOSE_EXTERNAL);
+            }
         }
     }
 
