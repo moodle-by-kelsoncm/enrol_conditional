@@ -29,12 +29,27 @@ $string['canntenrollate'] = 'You cannot enrol any more, since enrolment ended on
 $string['cohortnonmemberinfo'] = 'Only members of cohort \'{$a}\' can self-enrol.';
 $string['cohortonly'] = 'Only cohort members';
 $string['cohortonly_help'] = 'Self enrolment may be restricted to members of a specified cohort only. Note that changing this setting has no effect on existing enrolments.';
+$string['conditionaction'] = 'When the conditions are no longer met';
+$string['conditionaction_desc'] = 'Default action when a re-check finds that an enrolled user no longer meets the conditions.';
+$string['conditionaction_help'] = 'What happens to an existing enrolment when a re-check finds that the user no longer meets the conditions.
+
+* Nothing: the plugin only records it in the logs, once until the conditions are met again.
+* Suspend: the enrolment is suspended.
+* Remove: the user is unenrolled. Some user data in the course may be lost.
+
+When the plugin cannot evaluate a condition (for example, its type was uninstalled), it never changes the enrolment.';
+$string['conditionactionnone'] = 'Nothing (only record it)';
+$string['conditionactionremove'] = 'Remove the enrolment';
+$string['conditionactionsuspend'] = 'Suspend the enrolment';
 $string['conditional:config'] = 'Configure self enrol instances';
 $string['conditional:enrolself'] = 'Self enrol in course';
 $string['conditional:holdkey'] = 'Appear as the self enrolment key holder';
 $string['conditional:manage'] = 'Manage enrolled users';
 $string['conditional:unenrol'] = 'Unenrol users from course';
 $string['conditional:unenrolself'] = 'Unenrol self from the course';
+$string['conditionreactivate'] = 'Reactivate when the conditions are met again';
+$string['conditionreactivate_desc'] = 'Reactivate by default the enrolments suspended by this plugin when the conditions are met again.';
+$string['conditionreactivate_help'] = 'If enabled, enrolments that this plugin suspended are reactivated when the user meets the conditions again. Suspensions made by other people or processes are never reactivated, and neither are enrolments changed by someone else after the plugin suspended them.';
 $string['conditions'] = 'Conditions';
 $string['conditions_help'] = 'Users can only self enrol when they meet these conditions. Combine conditions in groups that require all or any of their items, and mark a condition or group as "Must not be met" to invert it. Without conditions, anybody who can self enrol is accepted.';
 $string['conditionsnotmet'] = 'You cannot enrol yourself in this course because:';
@@ -55,6 +70,9 @@ $string['enrolperiod_desc'] = 'Default length of time that the enrolment is vali
 $string['enrolperiod_help'] = 'Length of time that the enrolment is valid, starting with the moment the user enrols themselves. If disabled, the enrolment duration will be unlimited.';
 $string['enrolstartdate'] = 'Start date';
 $string['enrolstartdate_help'] = 'If enabled, users can enrol themselves from this date onward only.';
+$string['eventconditionsnotmet'] = 'Enrolment conditions no longer met';
+$string['eventuserenrolmentreactivated'] = 'User enrolment reactivated by conditions';
+$string['eventuserenrolmentsuspended'] = 'User enrolment suspended by conditions';
 $string['expiredaction'] = 'Enrolment expiry action';
 $string['expiredaction_help'] = 'Select action to carry out when user enrolment expires. Please note that some user data and settings are purged from course during course unenrolment.';
 $string['expiryinactivemessageenrolledbody'] = 'Hi {$a->user},

@@ -9,3 +9,6 @@ All notable changes to the Conditional self enrolment plugin will be documented 
 - The deprecated `enrol_self_enrol_form` class was not copied; the dynamic form `enrol_conditional\form\enrol_form` is used.
 - Depends on `local_enrolconditions`, which declares the `enrolcond` subplugin type: Moodle only accepts subplugins under `mod`, `editor`, `tool` and `local` plugins.
 - New courses do not get an instance of this method by default (`defaultenrol` is off).
+- Action when a re-check finds that the conditions are no longer met: nothing (logged once per episode), suspend (default) or remove, plus automatic reactivation. Stored in `customint8` (action, plus 16 to reactivate).
+- Table `enrol_conditional_state`: the plugin only reactivates enrolments that it suspended itself and that nobody changed since. Unknown results never suspend nor reactivate.
+- Events `user_enrolment_suspended`, `user_enrolment_reactivated` and `conditions_not_met`.

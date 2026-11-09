@@ -34,6 +34,24 @@ class enrol_conditional_plugin extends enrol_plugin {
     /** @var string Column of the enrol table with the condition tree (JSON). */
     public const FIELD_CONDITIONS = 'customtext2';
 
+    /** @var string Column with the action when the conditions stop being met, plus FLAG_REACTIVATE. */
+    public const FIELD_ACTION = 'customint8';
+
+    /** @var int Only record that the conditions are no longer met. */
+    public const ACTION_NONE = 0;
+
+    /** @var int Suspend the enrolment. */
+    public const ACTION_SUSPEND = 1;
+
+    /** @var int Remove the enrolment. */
+    public const ACTION_REMOVE = 2;
+
+    /** @var int Bits of FIELD_ACTION with the action. */
+    public const ACTION_MASK = 15;
+
+    /** @var int Bit of FIELD_ACTION: reactivate enrolments suspended by the plugin when the conditions are met again. */
+    public const FLAG_REACTIVATE = 16;
+
     /** @var stdClass|null Last enroller found by get_enroller(). */
     protected $lasternoller = null;
     /** @var int Instance id of the last enroller found by get_enroller(). */
@@ -522,6 +540,7 @@ class enrol_conditional_plugin extends enrol_plugin {
         $fields['customint4']      = $this->get_config('sendcoursewelcomemessage');
         $fields['customint5']      = 0;
         $fields['customint6']      = $this->get_config('newenrols');
+        $fields[self::FIELD_ACTION] = self::get_action_field(null);
 
         return $fields;
     }
@@ -849,6 +868,19 @@ class enrol_conditional_plugin extends enrol_plugin {
     }
 
     /**
+     * Deletes the instance and its condition records.
+     *
+     * @param stdClass $instance
+     * @return void
+     */
+    public function delete_instance($instance) {
+        global $DB;
+        parent::delete_instance($instance);
+        // The observer removes the records of each unenrolled user; this catches anything left.
+        $DB->delete_records(\enrol_conditional\local\enforcer::TABLE, ['instanceid' => $instance->id]);
+    }
+
+    /**
      * Is it possible to delete enrol instance via standard UI?
      *
      * @param stdClass $instance
@@ -1100,6 +1132,19 @@ class enrol_conditional_plugin extends enrol_plugin {
                 $instance->{self::FIELD_CONDITIONS} ?? null,
             );
             $mform->addHelpButton(self::FIELD_CONDITIONS . '_editor', 'conditions', 'enrol_conditional');
+
+            $mform->addElement(
+                'select',
+                'conditionaction',
+                get_string('conditionaction', 'enrol_conditional'),
+                $this->get_condition_action_options()
+            );
+            $mform->addHelpButton('conditionaction', 'conditionaction', 'enrol_conditional');
+            $mform->setDefault('conditionaction', self::get_condition_action($instance));
+
+            $mform->addElement('advcheckbox', 'conditionreactivate', get_string('conditionreactivate', 'enrol_conditional'));
+            $mform->addHelpButton('conditionreactivate', 'conditionreactivate', 'enrol_conditional');
+            $mform->setDefault('conditionreactivate', (int) self::get_reactivate($instance));
         }
 
         // Course welcome message.
@@ -1252,6 +1297,8 @@ class enrol_conditional_plugin extends enrol_plugin {
             'customint4' => PARAM_INT,
             'customint5' => PARAM_INT,
             'customint6' => $validnewenrols,
+            'conditionaction' => array_keys($this->get_condition_action_options()),
+            'conditionreactivate' => [0, 1],
             'status' => $validstatus,
             'enrolperiod' => PARAM_INT,
             'expirynotify' => $validexpirynotify,
@@ -1312,6 +1359,86 @@ class enrol_conditional_plugin extends enrol_plugin {
     }
 
     /**
+     * Value of FIELD_ACTION, with the site defaults when the instance has none yet.
+     *
+     * @param stdClass|null $instance
+     * @return int
+     */
+    protected static function get_action_field(?stdClass $instance): int {
+        if ($instance !== null && isset($instance->{self::FIELD_ACTION})) {
+            return (int) $instance->{self::FIELD_ACTION};
+        }
+        return self::encode_action(
+            (int) get_config('enrol_conditional', 'conditionaction'),
+            (bool) get_config('enrol_conditional', 'conditionreactivate')
+        );
+    }
+
+    /**
+     * Action applied when the conditions of an enrolment stop being met.
+     *
+     * @param stdClass|null $instance
+     * @return int One of the ACTION_ constants.
+     */
+    public static function get_condition_action(?stdClass $instance): int {
+        $action = self::get_action_field($instance) & self::ACTION_MASK;
+        return in_array($action, [self::ACTION_NONE, self::ACTION_SUSPEND, self::ACTION_REMOVE], true)
+            ? $action : self::ACTION_SUSPEND;
+    }
+
+    /**
+     * Whether enrolments suspended by the plugin are reactivated when the conditions are met again.
+     *
+     * @param stdClass|null $instance
+     * @return bool
+     */
+    public static function get_reactivate(?stdClass $instance): bool {
+        return (bool) (self::get_action_field($instance) & self::FLAG_REACTIVATE);
+    }
+
+    /**
+     * Value stored in FIELD_ACTION.
+     *
+     * @param int $action One of the ACTION_ constants.
+     * @param bool $reactivate
+     * @return int
+     */
+    public static function encode_action(int $action, bool $reactivate): int {
+        return ($action & self::ACTION_MASK) | ($reactivate ? self::FLAG_REACTIVATE : 0);
+    }
+
+    /**
+     * Options of the action when the conditions stop being met.
+     *
+     * @return array
+     */
+    public function get_condition_action_options(): array {
+        return [
+            self::ACTION_NONE => get_string('conditionactionnone', 'enrol_conditional'),
+            self::ACTION_SUSPEND => get_string('conditionactionsuspend', 'enrol_conditional'),
+            self::ACTION_REMOVE => get_string('conditionactionremove', 'enrol_conditional'),
+        ];
+    }
+
+    /**
+     * Moves the form fields conditionaction and conditionreactivate into FIELD_ACTION.
+     *
+     * @param array $fields Instance fields, changed in place.
+     * @param stdClass|null $instance Current instance, for the values not sent.
+     */
+    protected function merge_action_fields(array &$fields, ?stdClass $instance): void {
+        if (!array_key_exists('conditionaction', $fields) && !array_key_exists('conditionreactivate', $fields)) {
+            return;
+        }
+        $action = array_key_exists('conditionaction', $fields)
+            ? (int) $fields['conditionaction'] : self::get_condition_action($instance);
+        $reactivate = array_key_exists('conditionreactivate', $fields)
+            ? (bool) $fields['conditionreactivate'] : self::get_reactivate($instance);
+        $fields[self::FIELD_ACTION] = self::encode_action($action, $reactivate);
+        unset($fields['conditionaction'], $fields['conditionreactivate']);
+    }
+
+    /**
      * Add new instance of enrol plugin.
      *
      * @param stdClass $course
@@ -1330,6 +1457,11 @@ class enrol_conditional_plugin extends enrol_plugin {
         }
         if (!empty($fields) && array_key_exists(self::FIELD_CONDITIONS, $fields)) {
             $fields[self::FIELD_CONDITIONS] = $this->normalise_conditions($fields[self::FIELD_CONDITIONS]);
+        }
+        $fields = $fields ?? [];
+        $this->merge_action_fields($fields, null);
+        if (!isset($fields[self::FIELD_ACTION])) {
+            $fields[self::FIELD_ACTION] = self::get_action_field(null);
         }
 
         return parent::add_instance($course, $fields);
@@ -1364,6 +1496,9 @@ class enrol_conditional_plugin extends enrol_plugin {
             // Core skips null values, so an empty tree is stored as an empty string.
             $data->{self::FIELD_CONDITIONS} = $this->normalise_conditions($data->{self::FIELD_CONDITIONS}) ?? '';
         }
+        $fields = (array) $data;
+        $this->merge_action_fields($fields, $instance);
+        $data = (object) $fields;
 
         return parent::update_instance($instance, $data);
     }

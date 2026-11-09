@@ -109,6 +109,25 @@ if ($ADMIN->fulltree) {
         $options
     ));
 
+    $settings->add(new admin_setting_configselect(
+        'enrol_conditional/conditionaction',
+        get_string('conditionaction', 'enrol_conditional'),
+        get_string('conditionaction_desc', 'enrol_conditional'),
+        1,
+        [
+            0 => get_string('conditionactionnone', 'enrol_conditional'),
+            1 => get_string('conditionactionsuspend', 'enrol_conditional'),
+            2 => get_string('conditionactionremove', 'enrol_conditional'),
+        ]
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'enrol_conditional/conditionreactivate',
+        get_string('conditionreactivate', 'enrol_conditional'),
+        get_string('conditionreactivate_desc', 'enrol_conditional'),
+        1
+    ));
+
     $options = [1  => get_string('yes'),
                      0 => get_string('no')];
     $settings->add(new admin_setting_configselect(
