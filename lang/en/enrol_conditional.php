@@ -22,11 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['cachedef_observedevents'] = 'Events observed by the conditions of the instances that re-check on events';
 $string['cannotenrolreason'] = 'You cannot enrol yourself in this course: {$a}';
 $string['canntenrol'] = 'Enrolment is disabled or inactive';
 $string['canntenrolearly'] = 'You cannot enrol yet; enrolment starts on {$a}.';
 $string['canntenrollate'] = 'You cannot enrol any more, since enrolment ended on {$a}.';
-$string['cachedef_observedevents'] = 'Events observed by the conditions of the instances that re-check on events';
 $string['checkbatchsize'] = 'Enrolments per periodic check';
 $string['checkbatchsize_desc'] = 'Maximum number of enrolments re-checked by each run of the scheduled task. The next run continues where the previous one stopped.';
 $string['checkconditionstask'] = 'Re-check the conditions of conditional self enrolments';
