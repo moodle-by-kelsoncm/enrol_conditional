@@ -837,7 +837,17 @@ class enrol_conditional_plugin extends enrol_plugin {
             $instance = reset($instances);
             $instanceid = $instance->id;
         } else {
-            $instanceid = $this->add_instance($course, (array)$data);
+            $samesite = $step->get_task()->is_samesite();
+            try {
+                $data->{self::FIELD_CONDITIONS} = \local_enrolconditions\tree::from_json($data->{self::FIELD_CONDITIONS} ?? null)
+                    ->for_restore($samesite)->to_json();
+                $instanceid = $this->add_instance($course, (array) $data);
+            } catch (\local_enrolconditions\invalid_tree_exception $e) {
+                // Keep the invalid tree: it blocks self enrolment until fixed, instead of removing the conditions.
+                $step->log('Invalid condition tree in enrolment instance ' . $oldid . ': ' . $e->getMessage(), backup::LOG_WARNING);
+                $instanceid = enrol_plugin::add_instance($course, (array) $data);
+                $this->purge_event_map();
+            }
         }
         $step->set_mapping('enrol', $oldid, $instanceid);
     }

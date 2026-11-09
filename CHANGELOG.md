@@ -14,3 +14,6 @@ All notable changes to the Conditional self enrolment plugin will be documented 
 - Events `user_enrolment_suspended`, `user_enrolment_reactivated` and `conditions_not_met`.
 - The cohort restriction of `enrol_self` (`customint5`) was removed in favour of the `enrolcond_cohort` condition. The upgrade adds a cohort condition to the tree of instances that used it.
 - Check modes per instance in `customint7` (bitmask): at enrolment (always), at login (`sync_user_enrolments`), periodically (scheduled task `check_conditions`, in batches of `checkbatchsize` that resume where the previous run stopped) and on the events observed by the conditions (catch-all observer with a cached map).
+- Privacy API: records of `enrol_conditional_state` are exported and deleted with the course context.
+- Backup and restore: open records of `enrol_conditional_state` go with the users, so restored suspensions can still be reactivated; condition trees from another site lose their cohort and course references. An invalid tree is kept and keeps blocking self enrolment.
+- Behat: self enrolment allowed and blocked by the conditions (step `the course "..." has a conditional self enrolment method with conditions:`), and a Behat step in CI.

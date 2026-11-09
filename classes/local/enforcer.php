@@ -139,15 +139,24 @@ class enforcer {
     }
 
     /**
+     * Loads the plugin library, where enrol_conditional_plugin lives.
+     *
+     * Static callers (observers) may run before anything loaded it.
+     */
+    protected static function require_plugin_lib(): void {
+        global $CFG;
+        require_once($CFG->dirroot . '/enrol/conditional/lib.php');
+    }
+
+    /**
      * SQL that selects enabled conditional instances with a check mode.
      *
      * @param int $mode One of the CHECK_ constants.
      * @return array [sql where, params] over the alias e.
      */
     protected static function instances_in_mode_sql(int $mode): array {
-        global $CFG, $DB;
-        // Static callers (observers) may run before the plugin library is loaded.
-        require_once($CFG->dirroot . '/enrol/conditional/lib.php');
+        global $DB;
+        self::require_plugin_lib();
         $where = "e.enrol = :enrolname AND e.status = :enabled AND " .
             $DB->sql_bitand('e.' . enrol_conditional_plugin::FIELD_CHECKMODES, $mode) . " <> 0";
         return [$where, ['enrolname' => 'conditional', 'enabled' => ENROL_INSTANCE_ENABLED]];
@@ -244,6 +253,7 @@ class enforcer {
      */
     public static function get_event_map(): array {
         global $DB;
+        self::require_plugin_lib();
         $cache = \cache::make('enrol_conditional', 'observedevents');
         $map = $cache->get('map');
         if ($map !== false) {
