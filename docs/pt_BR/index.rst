@@ -9,6 +9,12 @@ A *Conditional self enrolment* (autoinscrição condicional) é uma cópia do m�
 
 As condições vêm do plugin companheiro `local_enrolconditions <https://github.com/moodle-by-kelsoncm/local_enrolconditions>`_, como subplugins ``enrolcond``. Outros plugins podem acrescentar condições próprias.
 
+.. figure:: ../img/student-cannot-enrol.png
+   :alt: Quem não cumpre as condições vê quais faltam.
+   :width: 100%
+
+   Quem não cumpre as condições vê quais faltam.
+
 Principais recursos
 -------------------
 

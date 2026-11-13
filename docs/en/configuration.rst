@@ -20,10 +20,22 @@ Enrolments per periodic check
 
 New courses do not get an instance of this method by default (*Add instance to new courses* is off).
 
+.. figure:: ../img/admin-sitesettings.png
+   :alt: Site settings of the method.
+   :width: 100%
+
+   Site settings of the method.
+
 Managing the condition types
 ----------------------------
 
 *Site administration > Plugins > Enrolments > Enrolment conditions > Manage conditions* lists the installed condition types. A disabled type is no longer offered to teachers; instances that already use it refuse new self enrolments, because the condition can no longer be checked, and never suspend anybody because of it.
+
+.. figure:: ../img/admin-manageconditions.png
+   :alt: The installed condition types.
+   :width: 100%
+
+   The installed condition types.
 
 Lists from a query
 ------------------
@@ -38,6 +50,12 @@ Name and Query
 
 Keep results for
    How long the usernames returned by a query are reused before it runs again (default 5 minutes; 0 runs it on every check).
+
+   .. figure:: ../img/admin-querylists.png
+      :alt: Two lists defined by the administrator.
+      :width: 100%
+
+      Two lists defined by the administrator.
 
 When the settings are saved, each query is checked and run once. Queries with ``;``, comments, statements that change data, ``INTO`` or functions that wait or read server files are refused.
 

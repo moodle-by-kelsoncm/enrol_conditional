@@ -18,6 +18,12 @@ Periodically, in the scheduled task
 When something the conditions depend on changes
    As inscrições são reavaliadas quando ocorre um evento observado pelas condições: perfil atualizado (perfil), membro adicionado ou removido de coorte (coorte), curso concluído (curso concluído). As condições que dependem só do tempo ou de listas (data, usernames, consultas) não têm evento: combine-as com a reavaliação no login ou periódica.
 
+   .. figure:: ../img/course-rechecks.png
+      :alt: Quando as condições são avaliadas e o que acontece quando deixam de ser cumpridas.
+      :width: 100%
+
+      Quando as condições são avaliadas e o que acontece quando deixam de ser cumpridas.
+
 O que acontece quando as condições deixam de ser cumpridas
 ----------------------------------------------------------
 
@@ -33,6 +39,12 @@ Remove the enrolment
    O evento *Enrolment conditions no longer met* é disparado e o usuário é desinscrito. Os dados do usuário no curso seguem as regras do site para a desinscrição.
 
 *Reactivate when the conditions are met again*: as inscrições que este plugin suspendeu são reativadas quando o usuário volta a cumprir as condições, com o evento *User enrolment reactivated by conditions*. Remover todas as condições conta como cumpri-las.
+
+.. figure:: ../img/course-participants.png
+   :alt: Um participante suspenso pelas condições.
+   :width: 100%
+
+   Um participante suspenso pelas condições.
 
 Quais suspensões são reativadas
 -------------------------------

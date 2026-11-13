@@ -9,6 +9,12 @@ Versão em português: `Português (Brasil) <../pt-br/index.html>`_.
 
 The conditions come from the companion plugin `local_enrolconditions <https://github.com/moodle-by-kelsoncm/local_enrolconditions>`_, as ``enrolcond`` subplugins. Other plugins can add their own conditions.
 
+.. figure:: ../img/student-cannot-enrol.png
+   :alt: A user who does not meet the conditions sees which ones are missing.
+   :width: 100%
+
+   A user who does not meet the conditions sees which ones are missing.
+
 Main features
 -------------
 

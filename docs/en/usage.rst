@@ -10,6 +10,12 @@ Adding the method to a course
 #. Choose when the conditions are checked again and what happens when an enrolled user no longer meets them (see :doc:`rechecks`).
 #. Save. Users who meet the conditions see the *Enrol me* button on the course page.
 
+.. figure:: ../img/course-enrolmethods.png
+   :alt: Enrolment methods of a course with Conditional self enrolment.
+   :width: 100%
+
+   Enrolment methods of a course with *Conditional self enrolment*.
+
 The condition editor
 --------------------
 
@@ -21,12 +27,36 @@ The conditions form a tree. The root is a group:
 * *Must not be met* inverts a condition or a group (NOT).
 * *Edit* and *Remove* change or delete an item.
 
+.. figure:: ../img/course-conditions-editor.png
+   :alt: Department is Mathematics AND (member of a cohort OR completed another course) AND a date range.
+   :width: 100%
+
+   Department is Mathematics AND (member of a cohort OR completed another course) AND a date range.
+
 Without conditions, anybody who can self enrol in the course may enrol, as in ``enrol_self``. The editor needs JavaScript; without it, the saved conditions are kept unchanged.
+
+.. figure:: ../img/condition-profile.png
+   :alt: Add condition opens the form of the chosen type.
+   :width: 520px
+
+   *Add condition* opens the form of the chosen type.
 
 What users see
 --------------
 
 A user who meets the conditions enrols as with ``enrol_self``. A user who does not meet them sees *You cannot enrol yourself in this course because:* followed by the conditions not met, for example "You have completed the course Introduction" or "You must meet at least one of the following:".
+
+.. figure:: ../img/student-cannot-enrol.png
+   :alt: A user who does not meet the conditions.
+   :width: 100%
+
+   A user who does not meet the conditions.
+
+.. figure:: ../img/student-enrol-me.png
+   :alt: A user who meets the conditions.
+   :width: 100%
+
+   A user who meets the conditions.
 
 When a condition cannot be checked (a disabled condition type, a missing file, a failing query), its result is *unknown*. Unknown results block new self enrolments (*A condition can no longer be checked. Contact the course teacher.*) but never suspend, remove or reactivate an existing enrolment.
 

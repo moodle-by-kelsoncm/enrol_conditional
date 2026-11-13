@@ -18,6 +18,12 @@ Periodically, in the scheduled task
 When something the conditions depend on changes
    The enrolments are checked when an event observed by the conditions happens: profile updated (profile), cohort member added or removed (cohort), course completed (course completed). Conditions that depend only on time or on lists (date, usernames, queries) have no event: combine them with the login or periodic check.
 
+   .. figure:: ../img/course-rechecks.png
+      :alt: When the conditions are checked and what happens when they are no longer met.
+      :width: 100%
+
+      When the conditions are checked and what happens when they are no longer met.
+
 What happens when the conditions are no longer met
 --------------------------------------------------
 
@@ -33,6 +39,12 @@ Remove the enrolment
    The event *Enrolment conditions no longer met* is fired and the user is unenrolled. Course data of the user follows the site rules for unenrolment.
 
 *Reactivate when the conditions are met again*: enrolments that this plugin suspended are reactivated when the user meets the conditions again, with the event *User enrolment reactivated by conditions*. Removing all the conditions counts as meeting them.
+
+.. figure:: ../img/course-participants.png
+   :alt: A participant suspended by the conditions.
+   :width: 100%
+
+   A participant suspended by the conditions.
 
 Which suspensions are reactivated
 ---------------------------------
