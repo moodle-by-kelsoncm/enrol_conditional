@@ -1,7 +1,7 @@
 Instalação
 ==========
 
-Requisitos: Moodle 5.3 LTS e `local_enrolconditions <https://github.com/moodle-by-kelsoncm/local_enrolconditions>`_, que fornece as condições.
+Requisitos: Moodle 5.3 LTS e `local_enrolconditions <https://github.com/moodle-by-kelsoncm/local_enrolconditions>`_, que fornece as condições (`documentação dele <https://moodle-by-kelsoncm.github.io/local_enrolconditions/pt-br/>`_).
 
 #. Copie o ``local_enrolconditions`` para ``public/local/enrolconditions``.
 #. Copie este plugin para ``public/enrol/conditional``.

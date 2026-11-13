@@ -55,4 +55,4 @@ List from a query (``enrolcond_sqlquery``)
 Conditions from other plugins
 -----------------------------
 
-Any plugin can provide conditions through the hook ``\local_enrolconditions\hook\collect_conditions``, with classes that extend ``\local_enrolconditions\condition\base``. See the README of ``local_enrolconditions``.
+Any plugin can provide conditions through the hook ``\local_enrolconditions\hook\collect_conditions``, with classes that extend ``\local_enrolconditions\condition\base``. See the `developer documentation of local_enrolconditions <https://moodle-by-kelsoncm.github.io/local_enrolconditions/en/developers.html>`_.
