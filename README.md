@@ -4,6 +4,10 @@
 
 Documentation / Documentação: <https://moodle-by-kelsoncm.github.io/enrol_conditional/>
 
+![A user who does not meet the conditions sees which ones are missing / Quem não cumpre as condições vê quais faltam](docs/img/student-cannot-enrol.png)
+
+![Condition editor / Editor de condições](docs/img/course-conditions-editor.png)
+
 ## English
 
 Enrolment method based on the core self enrolment (`enrol_self`) where self enrolment depends on pluggable conditions combined with AND, OR and NOT. The conditions can also be checked again at login, periodically or when events happen, suspending or removing enrolments that no longer meet them. Supports Moodle 5.3 LTS.

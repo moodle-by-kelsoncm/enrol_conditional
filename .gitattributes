@@ -1,0 +1,2 @@
+# Screenshots of the documentation stay out of the plugin ZIP (git archive).
+docs/img/ export-ignore

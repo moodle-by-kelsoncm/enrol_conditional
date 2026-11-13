@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#0f6cbf"/>
+  <!-- Condition tree -->
+  <g stroke="#ffffff" stroke-width="18" stroke-linecap="round" fill="none" opacity="0.9">
+    <path d="M128 140 V372"/>
+    <path d="M128 196 H196"/>
+    <path d="M128 316 H196"/>
+  </g>
+  <circle cx="128" cy="128" r="30" fill="#ffffff"/>
+  <rect x="200" y="166" width="60" height="60" rx="14" fill="#ffffff"/>
+  <path d="M214 196 l14 14 l24 -28" stroke="#0f6cbf" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="200" y="286" width="60" height="60" rx="14" fill="#ffffff"/>
+  <path d="M214 316 l14 14 l24 -28" stroke="#0f6cbf" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Person entering -->
+  <circle cx="372" cy="196" r="44" fill="#ffd166"/>
+  <path d="M292 392 c0 -66 36 -112 80 -112 s80 46 80 112 z" fill="#ffd166"/>
+</svg>

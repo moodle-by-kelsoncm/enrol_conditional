@@ -20,10 +20,22 @@ Enrolments per periodic check
 
 Cursos novos não recebem uma instância deste método por padrão (*Adicionar instância a novos cursos* fica desligado).
 
+.. figure:: ../img/admin-sitesettings.png
+   :alt: Configurações do método no site.
+   :width: 100%
+
+   Configurações do método no site.
+
 Gerenciando os tipos de condição
 --------------------------------
 
 *Administração do site > Plugins > Inscrições > Enrolment conditions > Manage conditions* lista os tipos de condição instalados. Um tipo desabilitado deixa de ser oferecido aos professores; as instâncias que já o usam recusam novas autoinscrições, porque a condição não pode mais ser avaliada, e nunca suspendem ninguém por causa dele.
+
+.. figure:: ../img/admin-manageconditions.png
+   :alt: Os tipos de condição instalados.
+   :width: 100%
+
+   Os tipos de condição instalados.
 
 Listas de consulta
 ------------------
@@ -38,6 +50,12 @@ Name e Query
 
 Keep results for
    Por quanto tempo os usernames devolvidos são reaproveitados antes de a consulta rodar de novo (padrão 5 minutos; 0 roda a cada avaliação).
+
+   .. figure:: ../img/admin-querylists.png
+      :alt: Duas listas definidas pelo administrador.
+      :width: 100%
+
+      Duas listas definidas pelo administrador.
 
 Ao salvar as configurações, cada consulta é verificada e executada uma vez. São recusadas consultas com ``;``, comentários, comandos que alteram dados, ``INTO`` ou funções de espera e de leitura de arquivos do servidor.
 

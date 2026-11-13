@@ -8,4 +8,10 @@ Requirements: Moodle 5.3 LTS and `local_enrolconditions <https://github.com/mood
 #. Visit *Site administration > Notifications* and finish the installation.
 #. Enable the method in *Site administration > Plugins > Enrolments > Manage enrol plugins*.
 
+.. figure:: ../img/admin-manageenrols.png
+   :alt: Conditional self enrolment enabled in Manage enrol plugins.
+   :width: 100%
+
+   Conditional self enrolment enabled in *Manage enrol plugins*.
+
 New courses do not get an instance of this method by default. Add it in each course under *Participants > Enrolment methods*, or turn on *Add instance to new courses* in the plugin settings.
