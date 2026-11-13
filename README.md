@@ -1,3 +1,5 @@
+<img src="docs/img/icon.svg" alt="Conditional self enrolment" width="96" align="right">
+
 # moodle-enrol_conditional
 
 [English](#english) · [Português (Brasil)](#português-brasil)

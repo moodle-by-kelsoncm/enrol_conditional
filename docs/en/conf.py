@@ -28,7 +28,11 @@ html_theme_options = {
     "show_edit_on_github": True,
     "enable_dark_mode": True,
     "enable_language_selector": True,
-    "navigation_links": "Home|index, Installation|installation, Configuration|configuration, Usage|usage, Backup/Restore|backup_restore",
+    "navigation_links": "Home|index, Installation|installation, Configuration|configuration, Usage|usage, Conditions|conditions, Re-checks|rechecks, Backup and privacy|backup_privacy",
 }
 
 html_static_path = []
+
+# Plugin icon (docs/img), also used on the Moodle Marketplace page.
+html_logo = "../img/icon.svg"
+html_favicon = "../img/favicon.ico"
