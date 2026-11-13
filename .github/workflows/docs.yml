@@ -43,6 +43,7 @@ jobs:
       - name: Add language redirect at the site root
         run: |
           cp docs/redirect/index.html _site/index.html
+          cp docs/img/favicon.ico _site/favicon.ico
           touch _site/.nojekyll
 
       - name: Upload Pages artifact
