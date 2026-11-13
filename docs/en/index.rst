@@ -7,7 +7,7 @@ Versão em português: `Português (Brasil) <../pt-br/index.html>`_.
 
 *Conditional self enrolment* is a copy of the core self enrolment method (``enrol_self``) in which users can only enrol themselves when they meet the conditions of the enrolment method. Teachers combine the conditions in groups that require all or any of their items, and can invert a condition or a group. The method can also check the conditions again after the enrolment and suspend or remove enrolments that no longer meet them.
 
-The conditions come from the companion plugin `local_enrolconditions <https://github.com/moodle-by-kelsoncm/local_enrolconditions>`_, as ``enrolcond`` subplugins. Other plugins can add their own conditions.
+The conditions come from the companion plugin `local_enrolconditions <https://moodle-by-kelsoncm.github.io/local_enrolconditions/en/>`_, as ``enrolcond`` subplugins. Other plugins can add their own conditions.
 
 .. figure:: ../img/student-cannot-enrol.png
    :alt: A user who does not meet the conditions sees which ones are missing.

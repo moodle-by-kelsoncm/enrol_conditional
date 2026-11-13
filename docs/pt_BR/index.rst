@@ -7,7 +7,7 @@ English version: `English <../en/index.html>`_.
 
 A *Conditional self enrolment* (autoinscrição condicional) é uma cópia do método de autoinscrição do core (``enrol_self``) em que o usuário só consegue se inscrever quando cumpre as condições do método de inscrição. O professor combina as condições em grupos que exigem todos ou qualquer um dos itens, e pode inverter uma condição ou um grupo. O método também pode reavaliar as condições depois da inscrição e suspender ou remover as inscrições que deixaram de cumpri-las.
 
-As condições vêm do plugin companheiro `local_enrolconditions <https://github.com/moodle-by-kelsoncm/local_enrolconditions>`_, como subplugins ``enrolcond``. Outros plugins podem acrescentar condições próprias.
+As condições vêm do plugin companheiro `local_enrolconditions <https://moodle-by-kelsoncm.github.io/local_enrolconditions/pt-br/>`_, como subplugins ``enrolcond``. Outros plugins podem acrescentar condições próprias.
 
 .. figure:: ../img/student-cannot-enrol.png
    :alt: Quem não cumpre as condições vê quais faltam.
