@@ -21,8 +21,8 @@ html_theme_path = [moodle_docs_theme.get_html_theme_path()]
 html_theme_options = {
     "project_name": "moodle-enrol_conditional",
     "tagline": "Self enrolment gated by pluggable conditions for Moodle",
-    "github_url": "https://github.com/moodle-by-kelsoncm/enrol_conditional",
-    "github_repo": "moodle-by-kelsoncm/enrol_conditional",
+    "github_url": "https://github.com/moodle-by-kelsoncm/moodle-enrol_conditional",
+    "github_repo": "moodle-by-kelsoncm/moodle-enrol_conditional",
     "github_version": "main",
     "doc_path": "docs/en/",
     "show_edit_on_github": True,
