@@ -4,7 +4,7 @@
 
 [English](#english) · [Português (Brasil)](#português-brasil)
 
-Documentation / Documentação: <https://moodle-by-kelsoncm.github.io/enrol_conditional/>
+Documentation / Documentação: <https://moodle-by-kelsoncm.github.io/moodle-enrol_conditional/>
 
 ![A user who does not meet the conditions sees which ones are missing / Quem não cumpre as condições vê quais faltam](docs/img/student-cannot-enrol.png)
 
@@ -14,7 +14,7 @@ Documentation / Documentação: <https://moodle-by-kelsoncm.github.io/enrol_cond
 
 Enrolment method based on the core self enrolment (`enrol_self`) where self enrolment depends on pluggable conditions combined with AND, OR and NOT. The conditions can also be checked again at login, periodically or when events happen, suspending or removing enrolments that no longer meet them. Supports Moodle 5.3 LTS.
 
-Requires [`local_enrolconditions`](https://github.com/moodle-by-kelsoncm/local_enrolconditions), which provides the condition engine and the `enrolcond` subplugins (Moodle does not allow subplugins in enrolment plugins). Its documentation: <https://moodle-by-kelsoncm.github.io/local_enrolconditions/>.
+Requires [`local_enrolconditions`](https://github.com/moodle-by-kelsoncm/moodle-local_enrolconditions), which provides the condition engine and the `enrolcond` subplugins (Moodle does not allow subplugins in enrolment plugins). Its documentation: <https://moodle-by-kelsoncm.github.io/moodle-local_enrolconditions/>.
 
 Install: copy `local_enrolconditions` to `public/local/enrolconditions` and this repository to `public/enrol/conditional`, then visit *Site administration > Notifications*.
 
@@ -24,7 +24,7 @@ Conditions included: date, profile field, cohort, completed course, typed list o
 
 Método de inscrição baseado na autoinscrição do core (`enrol_self`) em que a autoinscrição depende de condições plugáveis combinadas com E, OU e NÃO. As condições também podem ser reavaliadas no login, periodicamente ou quando ocorrem eventos, suspendendo ou removendo inscrições que deixaram de cumpri-las. Suporta Moodle 5.3 LTS.
 
-Requer o [`local_enrolconditions`](https://github.com/moodle-by-kelsoncm/local_enrolconditions), que fornece o motor de condições e os subplugins `enrolcond` (o Moodle não permite subplugins em plugins de inscrição). Documentação dele: <https://moodle-by-kelsoncm.github.io/local_enrolconditions/>.
+Requer o [`local_enrolconditions`](https://github.com/moodle-by-kelsoncm/moodle-local_enrolconditions), que fornece o motor de condições e os subplugins `enrolcond` (o Moodle não permite subplugins em plugins de inscrição). Documentação dele: <https://moodle-by-kelsoncm.github.io/moodle-local_enrolconditions/>.
 
 Instalação: copie o `local_enrolconditions` para `public/local/enrolconditions` e este repositório para `public/enrol/conditional`, depois acesse *Administração do site > Notificações*.
 
@@ -36,7 +36,7 @@ Condições incluídas: data, campo de perfil, coorte, curso concluído, lista d
 
 ## Support / Suporte
 
-- Issue tracker / Rastreador de issues: <https://github.com/moodle-by-kelsoncm/enrol_conditional/issues>
+- Issue tracker / Rastreador de issues: <https://github.com/moodle-by-kelsoncm/moodle-enrol_conditional/issues>
 - Translations / Traduções: only English is shipped; other languages go through AMOS / o pacote traz só inglês; outros idiomas via AMOS.
 
 ## License / Licença
