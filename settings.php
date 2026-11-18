@@ -76,14 +76,6 @@ if ($ADMIN->fulltree) {
         $options
     ));
 
-    $settings->add(new admin_setting_configtext(
-        'enrol_conditional/checkbatchsize',
-        get_string('checkbatchsize', 'enrol_conditional'),
-        get_string('checkbatchsize_desc', 'enrol_conditional'),
-        500,
-        PARAM_INT
-    ));
-
     // Enrol instance defaults.
     $settings->add(new admin_setting_heading(
         'enrol_conditional_defaults',

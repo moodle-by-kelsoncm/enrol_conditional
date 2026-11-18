@@ -14,6 +14,6 @@ Backup e restauração
 Privacidade
 -----------
 
-* O ``enrol_conditional`` guarda, para cada suspensão feita pelo plugin, a inscrição, a ação, o motivo e as datas. Esses registros são exportados e excluídos com o curso ou com o usuário, pela Privacy API.
+* O ``enrol_conditional`` não guarda dados pessoais. O ``local_enrolconditions`` guarda, para cada suspensão feita por causa das condições, a inscrição, a ação, o motivo e as datas. Esses registros são exportados e excluídos com o curso ou com o usuário, pela Privacy API dele.
 * O ``enrolcond_userfile`` encontra os usuários listados nos arquivos de usernames: a solicitação de dados deles exporta os nomes dos arquivos, e a exclusão remove a linha deles dos arquivos.
 * Os demais tipos de condição não guardam dados pessoais.

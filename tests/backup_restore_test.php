@@ -16,9 +16,9 @@
 
 namespace enrol_conditional;
 
-use enrol_conditional\local\enforcer;
 use enrol_conditional_plugin;
 use local_enrolconditions\condition\manager;
+use local_enrolconditions\local\enforcer;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -126,7 +126,7 @@ final class backup_restore_test extends \advanced_testcase {
         $instance = $DB->get_record('enrol', ['id' => $id]);
         $this->plugin->enrol_user($instance, $suspended->id);
         $this->plugin->enrol_user($instance, $active->id);
-        (new enforcer($this->plugin))->check_user($instance, $suspended->id);
+        (new enforcer())->check_user($instance, $suspended->id);
         return [$course, $instance, $suspended, $active, $cohort];
     }
 
@@ -152,7 +152,7 @@ final class backup_restore_test extends \advanced_testcase {
         // The restored suspension still belongs to the plugin, so it is reactivated.
         require_once($GLOBALS["CFG"]->dirroot . "/cohort/lib.php");
         cohort_add_member($cohort->id, $suspended->id);
-        $outcome = (new enforcer($this->plugin))->check_user($restored, $suspended->id);
+        $outcome = (new enforcer())->check_user($restored, $suspended->id);
         $this->assertSame(enforcer::OUTCOME_REACTIVATED, $outcome);
     }
 

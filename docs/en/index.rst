@@ -24,7 +24,7 @@ Main features
 * Users who cannot enrol see which conditions they do not meet.
 * Re-checks at login, periodically or when something the conditions depend on changes, with three actions: only record it, suspend or remove the enrolment.
 * Automatic reactivation that only touches the enrolments this plugin suspended itself, never a suspension made by a person or by another plugin.
-* Events, Privacy API and backup and restore of the conditions and of the plugin's own suspensions.
+* Events, Privacy API and backup and restore of the conditions and of the suspensions made because of them.
 
 .. toctree::
    :maxdepth: 2

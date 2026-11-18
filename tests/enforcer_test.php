@@ -16,9 +16,9 @@
 
 namespace enrol_conditional;
 
-use enrol_conditional\local\enforcer;
 use enrol_conditional_plugin;
 use local_enrolconditions\condition\manager;
+use local_enrolconditions\local\enforcer;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -36,10 +36,10 @@ require_once($CFG->dirroot . '/local/enrolconditions/tests/fixtures/fake_conditi
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(enforcer::class)]
-#[\PHPUnit\Framework\Attributes\CoversClass(observer::class)]
-#[\PHPUnit\Framework\Attributes\CoversClass(event\user_enrolment_suspended::class)]
-#[\PHPUnit\Framework\Attributes\CoversClass(event\user_enrolment_reactivated::class)]
-#[\PHPUnit\Framework\Attributes\CoversClass(event\conditions_not_met::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(\local_enrolconditions\observer::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(\local_enrolconditions\event\user_enrolment_suspended::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(\local_enrolconditions\event\user_enrolment_reactivated::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(\local_enrolconditions\event\conditions_not_met::class)]
 final class enforcer_test extends \advanced_testcase {
     /** @var enrol_conditional_plugin */
     protected enrol_conditional_plugin $plugin;
@@ -61,7 +61,7 @@ final class enforcer_test extends \advanced_testcase {
         manager::reset_caches();
         manager::register_for_testing('fake', new \enrolcond_fake\condition());
         $this->plugin = enrol_get_plugin('conditional');
-        $this->enforcer = new enforcer($this->plugin);
+        $this->enforcer = new enforcer();
         $this->course = $this->getDataGenerator()->create_course();
         $this->user = $this->getDataGenerator()->create_user();
     }
@@ -165,7 +165,7 @@ final class enforcer_test extends \advanced_testcase {
         $outcome = $this->enforcer->check_user($instance, $this->user->id);
         $events = array_values(array_filter(
             $sink->get_events(),
-            fn($e) => $e instanceof event\user_enrolment_suspended
+            fn($e) => $e instanceof \local_enrolconditions\event\user_enrolment_suspended
         ));
         $sink->close();
 
@@ -200,7 +200,7 @@ final class enforcer_test extends \advanced_testcase {
         $outcome = $this->enforcer->check_user($instance, $this->user->id);
         $events = array_values(array_filter(
             $sink->get_events(),
-            fn($e) => $e instanceof event\user_enrolment_reactivated
+            fn($e) => $e instanceof \local_enrolconditions\event\user_enrolment_reactivated
         ));
         $sink->close();
 
@@ -331,7 +331,10 @@ final class enforcer_test extends \advanced_testcase {
         $instance = $this->set_allowed($instance, []);
         $this->assertSame(enforcer::OUTCOME_RECORDED, $this->enforcer->check_user($instance, $this->user->id));
 
-        $events = array_values(array_filter($sink->get_events(), fn($e) => $e instanceof event\conditions_not_met));
+        $events = array_values(array_filter(
+            $sink->get_events(),
+            fn($e) => $e instanceof \local_enrolconditions\event\conditions_not_met
+        ));
         $sink->close();
         $this->assertCount(2, $events);
         $this->assertSame('none', $events[0]->other['action']);
@@ -375,7 +378,10 @@ final class enforcer_test extends \advanced_testcase {
         $instance = $this->create_instance(enrol_conditional_plugin::ACTION_REMOVE, true, []);
         $sink = $this->redirectEvents();
         $this->assertSame(enforcer::OUTCOME_REMOVED, $this->enforcer->check_user($instance, $this->user->id));
-        $events = array_values(array_filter($sink->get_events(), fn($e) => $e instanceof event\conditions_not_met));
+        $events = array_values(array_filter(
+            $sink->get_events(),
+            fn($e) => $e instanceof \local_enrolconditions\event\conditions_not_met
+        ));
         $sink->close();
 
         $this->assertFalse($this->ue($instance));

@@ -22,40 +22,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['cachedef_observedevents'] = 'Events observed by the conditions of the instances that re-check on events';
 $string['cannotenrolreason'] = 'You cannot enrol yourself in this course: {$a}';
 $string['canntenrol'] = 'Enrolment is disabled or inactive';
 $string['canntenrolearly'] = 'You cannot enrol yet; enrolment starts on {$a}.';
 $string['canntenrollate'] = 'You cannot enrol any more, since enrolment ended on {$a}.';
-$string['checkbatchsize'] = 'Enrolments per periodic check';
-$string['checkbatchsize_desc'] = 'Maximum number of enrolments re-checked by each run of the scheduled task. The next run continues where the previous one stopped.';
-$string['checkconditionstask'] = 'Re-check the conditions of conditional self enrolments';
-$string['checkmodeenrol'] = 'When the user enrols (always)';
 $string['checkmodeevents'] = 'When something the conditions depend on changes';
 $string['checkmodeevents_desc'] = 'Re-check by default when an event observed by the conditions happens.';
 $string['checkmodelogin'] = 'When the user logs in';
 $string['checkmodelogin_desc'] = 'Re-check by default the enrolments of users when they log in.';
 $string['checkmodeperiodic'] = 'Periodically, in the scheduled task';
 $string['checkmodeperiodic_desc'] = 'Re-check by default the enrolments in the scheduled task.';
-$string['checkmodes'] = 'Check the conditions';
-$string['checkmodes_help'] = 'The conditions are always checked when a user enrols. Existing enrolments can also be re-checked:
-
-* When the user logs in.
-* Periodically, by the scheduled task, in batches.
-* When something the conditions depend on changes, for example the user profile or a cohort membership. Each condition type declares the events it depends on.
-
-When a re-check finds that the conditions are no longer met, the action below is applied.';
 $string['conditionaction'] = 'When the conditions are no longer met';
 $string['conditionaction_desc'] = 'Default action when a re-check finds that an enrolled user no longer meets the conditions.';
-$string['conditionaction_help'] = 'What happens to an existing enrolment when a re-check finds that the user no longer meets the conditions.
-
-* Nothing: the plugin only records it in the logs, once until the conditions are met again.
-* Suspend: the enrolment is suspended.
-* Remove: the user is unenrolled. Some user data in the course may be lost.
-
-When the plugin cannot evaluate a condition (for example, its type was uninstalled), it never changes the enrolment.
-
-Changing this setting does not undo what was already done: enrolments suspended by the plugin stay suspended until the user meets the conditions again and reactivation is enabled.';
 $string['conditionactionnone'] = 'Nothing (only record it)';
 $string['conditionactionremove'] = 'Remove the enrolment';
 $string['conditionactionsuspend'] = 'Suspend the enrolment';
@@ -67,9 +45,6 @@ $string['conditional:unenrol'] = 'Unenrol users from course';
 $string['conditional:unenrolself'] = 'Unenrol self from the course';
 $string['conditionreactivate'] = 'Reactivate when the conditions are met again';
 $string['conditionreactivate_desc'] = 'Reactivate by default the enrolments suspended by this plugin when the conditions are met again.';
-$string['conditionreactivate_help'] = 'If enabled, enrolments that this plugin suspended are reactivated when the user meets the conditions again. Removing all the conditions counts as meeting them.
-
-Suspensions made by other people or processes are never reactivated. If someone else reactivates an enrolment that the plugin suspended, or changes it directly in the database, the plugin no longer reactivates it. Changing only its dates, while it stays suspended, keeps it.';
 $string['conditions'] = 'Conditions';
 $string['conditions_help'] = 'Users can only self enrol when they meet these conditions. Combine conditions in groups that require all or any of their items, and mark a condition or group as "Must not be met" to invert it. Without conditions, anybody who can self enrol is accepted.';
 $string['conditionsnotmet'] = 'You cannot enrol yourself in this course because:';
@@ -143,15 +118,7 @@ $string['passwordinvalidhint'] = 'That enrolment key was incorrect, please try a
 $string['passwordmatchesgroupkey'] = 'This enrolment key is already used as a group enrolment key.';
 $string['pluginname'] = 'Conditional self enrolment';
 $string['pluginname_desc'] = 'The conditional self enrolment plugin allows users to choose which courses they want to participate in, as long as they meet the conditions configured for each enrolment method. The courses may be protected by an enrolment key. Internally the enrolment is done via the manual enrolment plugin which has to be enabled in the same course.';
-$string['privacy:metadata:state'] = 'Actions taken by the plugin when the conditions of an enrolment were no longer met. Enrolments are stored by core.';
-$string['privacy:metadata:state:action'] = 'Action taken: none (only recorded) or suspend.';
-$string['privacy:metadata:state:closereason'] = 'Why the record stopped applying.';
-$string['privacy:metadata:state:reason'] = 'Conditions that were not met.';
-$string['privacy:metadata:state:timeclosed'] = 'When the record stopped applying.';
-$string['privacy:metadata:state:timereactivated'] = 'When the plugin reactivated the enrolment.';
-$string['privacy:metadata:state:timesuspended'] = 'When the plugin acted.';
-$string['privacy:metadata:state:userenrolmentid'] = 'The enrolment of the user.';
-$string['privacy:path:state'] = 'Condition actions';
+$string['privacy:metadata'] = 'The Conditional self enrolment plugin does not store any personal data. The records of the actions taken when the conditions are no longer met are stored by the Enrolment conditions plugin.';
 $string['requirepassword'] = 'Require enrolment key';
 $string['requirepassword_desc'] = 'Require enrolment key in new courses and prevent removing of enrolment key from existing courses.';
 $string['role'] = 'Default assigned role';

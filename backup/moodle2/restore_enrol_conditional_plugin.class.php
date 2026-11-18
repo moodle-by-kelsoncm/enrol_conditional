@@ -22,13 +22,13 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use enrol_conditional\local\enforcer;
+use local_enrolconditions\local\enforcer;
 
 /**
- * Restores the open records of enrol_conditional_state.
+ * Restores the open records of local_enrolconditions_state.
  *
  * A record is restored only when the restored enrolment still matches it (suspended, for a suspension) and has
- * no open record yet. Its uetimemodified takes the restored enrolment, so the plugin keeps owning the suspension.
+ * no open record yet. Its uetimemodified takes the restored enrolment, so the enforcer keeps owning the suspension.
  *
  * @package    enrol_conditional
  * @copyright  2026 Kelson Medeiros <kelsoncm@gmail.com>
@@ -80,6 +80,7 @@ class restore_enrol_conditional_plugin extends restore_enrol_plugin {
             return;
         }
         $DB->insert_record(enforcer::TABLE, (object) [
+            'enrol' => 'conditional',
             'userenrolmentid' => $ue->id,
             'instanceid' => $enrolid,
             'action' => $data->action,

@@ -23,9 +23,9 @@
  */
 
 /**
- * Adds the open records of enrol_conditional_state to the enrolment instance, when users are included.
+ * Adds the open records of local_enrolconditions_state to the enrolment instance, when users are included.
  *
- * Only open records matter: they are what allows the plugin to reactivate the enrolments it suspended.
+ * Only open records matter: they are what allows the enforcer to reactivate the enrolments it suspended.
  *
  * @package    enrol_conditional
  * @copyright  2026 Kelson Medeiros <kelsoncm@gmail.com>
@@ -54,7 +54,7 @@ class backup_enrol_conditional_plugin extends backup_enrol_plugin {
         if ($this->task->get_setting_value('users')) {
             $state->set_source_sql(
                 "SELECT s.id, ue.userid, s.action, s.reason, s.timesuspended
-                   FROM {enrol_conditional_state} s
+                   FROM {local_enrolconditions_state} s
                    JOIN {user_enrolments} ue ON ue.id = s.userenrolmentid
                   WHERE s.instanceid = ? AND s.timeclosed IS NULL",
                 [backup::VAR_PARENTID]

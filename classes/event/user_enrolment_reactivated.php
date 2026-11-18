@@ -19,9 +19,12 @@ namespace enrol_conditional\event;
 /**
  * A user enrolment suspended by the plugin was reactivated because its conditions are met again.
  *
+ * Deprecated since 1.1.0: no longer triggered. \local_enrolconditions\event\user_enrolment_reactivated replaces it;
+ * kept so the logs written before still display.
+ *
  * @property-read array $other {
  *      - int enrolid: enrolment instance id.
- *      - int stateid: id in enrol_conditional_state.
+ *      - int stateid: id in the former enrol_conditional_state.
  * }
  *
  * @package    enrol_conditional

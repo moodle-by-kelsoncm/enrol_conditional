@@ -2,6 +2,15 @@
 
 All notable changes to the Conditional self enrolment plugin will be documented in this file.
 
+## 1.1.0 - 2026-11-18
+
+### Changed
+- The re-checks (login, scheduled task and events), the suspension, removal and reactivation of enrolments and their records moved to `local_enrolconditions` 1.1.0, which any enrolment method can now use. The plugin implements `\local_enrolconditions\enforceable`; its behaviour and settings are unchanged.
+- Requires `local_enrolconditions` 1.1.0. The upgrade moves the records of `enrol_conditional_state` to `local_enrolconditions_state`, removes the old table and moves the settings *Enrolments per periodic check* and the position of the periodic check to `local_enrolconditions`.
+- The scheduled task *Re-check the conditions of existing enrolments* now belongs to `local_enrolconditions`.
+- The events `user_enrolment_suspended`, `user_enrolment_reactivated` and `conditions_not_met` are now triggered by `local_enrolconditions`; the classes of `enrol_conditional` stay only to display the existing logs.
+- The privacy provider of `enrol_conditional` declares no personal data: `local_enrolconditions` covers the records.
+
 ## 1.0.1 - 2026-11-18
 
 ### Changed
