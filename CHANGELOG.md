@@ -2,6 +2,13 @@
 
 All notable changes to the Conditional self enrolment plugin will be documented in this file.
 
+## 1.0.1 - 2026-11-18
+
+### Changed
+- README and documentation point to the repository renamed to `moodle-by-kelsoncm/moodle-enrol_conditional`; the CI installs `moodle-by-kelsoncm/moodle-local_enrolconditions`.
+- Documentation with screenshots, the plugin icon as logo and favicon, and links to the `local_enrolconditions` documentation site.
+- Screenshots of the documentation (`docs/img/`) stay out of the plugin ZIP.
+
 ## 1.0.0 - 2026-11-09
 
 ### Added
