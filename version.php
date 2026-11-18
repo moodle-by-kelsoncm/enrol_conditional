@@ -25,10 +25,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'enrol_conditional';
-$plugin->version = 2026110903;
+$plugin->version = 2026111800;
 $plugin->requires = 2026100200;
 $plugin->supported = [503, 503];
-$plugin->release = '1.0.0';
+$plugin->release = '1.0.1';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [
     'local_enrolconditions' => 2026110901,
