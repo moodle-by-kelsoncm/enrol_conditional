@@ -45,14 +45,4 @@ $tasks = [
         'dayofweek' => '*',
         'disabled' => 0,
     ],
-    [
-        'classname' => '\enrol_conditional\task\check_conditions',
-        'blocking' => 0,
-        'minute' => 'R',
-        'hour' => '*',
-        'day' => '*',
-        'month' => '*',
-        'dayofweek' => '*',
-        'disabled' => 0,
-    ],
 ];

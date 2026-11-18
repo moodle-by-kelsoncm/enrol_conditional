@@ -24,7 +24,7 @@ Principais recursos
 * Quem não consegue se inscrever vê quais condições não cumpre.
 * Reavaliação no login, periódica ou quando muda algo de que as condições dependem, com três ações: só registrar, suspender ou remover a inscrição.
 * Reativação automática que só mexe nas inscrições que o próprio plugin suspendeu, nunca numa suspensão feita por uma pessoa ou por outro plugin.
-* Eventos, Privacy API e backup e restauração das condições e das suspensões do próprio plugin.
+* Eventos, Privacy API e backup e restauração das condições e das suspensões feitas por causa delas.
 
 .. note:: O plugin só traz o pacote de idioma em inglês; os nomes da interface aparecem aqui em inglês, como no Moodle sem tradução.
 

@@ -90,5 +90,30 @@ function xmldb_enrol_conditional_upgrade(int $oldversion): bool {
         upgrade_plugin_savepoint(true, 2026110902, 'enrol', 'conditional');
     }
 
+    if ($oldversion < 2026111801) {
+        // The enforcer moved to local_enrolconditions 1.1.0. Moodle upgrades the enrol plugins before the local
+        // ones, so the new table may not exist yet. The records keep the same meaning; only the enrol column is new.
+        $oldtable = new xmldb_table('enrol_conditional_state');
+        if ($dbman->table_exists($oldtable)) {
+            \local_enrolconditions\local\schema::create_state_table();
+            $records = $DB->get_recordset('enrol_conditional_state', null, 'id ASC');
+            foreach ($records as $record) {
+                unset($record->id);
+                $record->enrol = 'conditional';
+                $DB->insert_record('local_enrolconditions_state', $record, false);
+            }
+            $records->close();
+            $dbman->drop_table($oldtable);
+        }
+        foreach (['checkbatchsize', 'periodiccursor'] as $name) {
+            $value = get_config('enrol_conditional', $name);
+            if ($value !== false) {
+                set_config($name, $value, 'local_enrolconditions');
+                unset_config($name, 'enrol_conditional');
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026111801, 'enrol', 'conditional');
+    }
+
     return true;
 }

@@ -22,10 +22,13 @@ namespace enrol_conditional\event;
  * Triggered once per episode when the action is "none", and before the removal when the action is "remove".
  * Suspensions trigger user_enrolment_suspended instead.
  *
+ * Deprecated since 1.1.0: no longer triggered. \local_enrolconditions\event\conditions_not_met replaces it;
+ * kept so the logs written before still display.
+ *
  * @property-read array $other {
  *      - int enrolid: enrolment instance id.
  *      - string action: none or remove.
- *      - int stateid: id in enrol_conditional_state, 0 when there is none.
+ *      - int stateid: id in the former enrol_conditional_state, 0 when there is none.
  * }
  *
  * @package    enrol_conditional

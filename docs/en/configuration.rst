@@ -15,8 +15,7 @@ Reactivate when the conditions are met again
 When the user logs in / Periodically, in the scheduled task / When something the conditions depend on changes
    Default check modes for new instances. All off by default: new instances only check the conditions when a user enrols.
 
-Enrolments per periodic check
-   Maximum number of enrolments re-checked by each run of the scheduled task (default 500). The next run continues where the previous one stopped.
+The number of enrolments re-checked by each run of the scheduled task (*Enrolments per periodic check*) is set in *Site administration > Plugins > Enrolments > Enrolment conditions > Re-checks* (see the `Enrolment conditions documentation <https://moodle-by-kelsoncm.github.io/moodle-local_enrolconditions/en/administration.html>`_).
 
 New courses do not get an instance of this method by default (*Add instance to new courses* is off).
 

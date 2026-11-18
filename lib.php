@@ -30,21 +30,12 @@ use core_enrol\output\enrol_page;
  * @author Petr Skoda
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class enrol_conditional_plugin extends enrol_plugin {
+class enrol_conditional_plugin extends enrol_plugin implements \local_enrolconditions\enforceable {
     /** @var string Column of the enrol table with the condition tree (JSON). */
     public const FIELD_CONDITIONS = 'customtext2';
 
     /** @var string Column with the action when the conditions stop being met, plus FLAG_REACTIVATE. */
     public const FIELD_ACTION = 'customint8';
-
-    /** @var int Only record that the conditions are no longer met. */
-    public const ACTION_NONE = 0;
-
-    /** @var int Suspend the enrolment. */
-    public const ACTION_SUSPEND = 1;
-
-    /** @var int Remove the enrolment. */
-    public const ACTION_REMOVE = 2;
 
     /** @var int Bits of FIELD_ACTION with the action. */
     public const ACTION_MASK = 15;
@@ -55,24 +46,8 @@ class enrol_conditional_plugin extends enrol_plugin {
     /** @var string Column with the bitmask of when the conditions are checked. */
     public const FIELD_CHECKMODES = 'customint7';
 
-    /** @var int Check when the user enrols (always on). */
-    public const CHECK_ENROL = 1;
-
-    /** @var int Re-check when the user logs in. */
-    public const CHECK_LOGIN = 2;
-
-    /** @var int Re-check in the scheduled task. */
-    public const CHECK_PERIODIC = 4;
-
-    /** @var int Re-check when an event observed by the conditions happens. */
-    public const CHECK_EVENTS = 8;
-
-    /** @var array Form field of each optional check mode. */
-    public const CHECK_MODE_FIELDS = [
-        'checkmodelogin' => self::CHECK_LOGIN,
-        'checkmodeperiodic' => self::CHECK_PERIODIC,
-        'checkmodeevents' => self::CHECK_EVENTS,
-    ];
+    /** @var array Form field (and site setting) of each optional check mode. */
+    public const CHECK_MODE_FIELDS = \local_enrolconditions\output\enforcement_form::CHECK_MODE_FIELDS;
 
     /** @var stdClass|null Last enroller found by get_enroller(). */
     protected $lasternoller = null;
@@ -454,19 +429,33 @@ class enrol_conditional_plugin extends enrol_plugin {
      * @return \local_enrolconditions\tree_result|null Null when the instance has no conditions.
      */
     public function evaluate_conditions(stdClass $instance, int $userid): ?\local_enrolconditions\tree_result {
-        try {
-            $tree = \local_enrolconditions\tree::from_json($instance->{self::FIELD_CONDITIONS} ?? null);
-        } catch (\local_enrolconditions\invalid_tree_exception $e) {
-            debugging("Invalid condition tree in enrolment instance {$instance->id}: " . $e->getMessage(), DEBUG_DEVELOPER);
-            return new \local_enrolconditions\tree_result(null, [[
-                'message' => get_string('failureunknown', 'local_enrolconditions'),
-                'children' => [],
-            ]]);
-        }
-        if ($tree->is_empty()) {
-            return null;
-        }
-        return $tree->evaluate($userid, $instance);
+        return \local_enrolconditions\local\enforcer::evaluate($this->get_enforcement_tree($instance), $userid, $instance);
+    }
+
+    #[\Override]
+    public function get_enforcement_tree(stdClass $instance): ?string {
+        return $instance->{self::FIELD_CONDITIONS} ?? null;
+    }
+
+    #[\Override]
+    public function get_enforcement_check_modes(stdClass $instance): int {
+        return self::get_check_modes($instance);
+    }
+
+    #[\Override]
+    public function get_enforcement_action(stdClass $instance): int {
+        return self::get_condition_action($instance);
+    }
+
+    #[\Override]
+    public function get_enforcement_reactivate(stdClass $instance): bool {
+        return self::get_reactivate($instance);
+    }
+
+    #[\Override]
+    public function get_enforcement_mode_sql(int $mode): ?array {
+        global $DB;
+        return [$DB->sql_bitand('e.' . self::FIELD_CHECKMODES, $mode) . ' <> 0', []];
     }
 
     /**
@@ -886,10 +875,8 @@ class enrol_conditional_plugin extends enrol_plugin {
      * @return void
      */
     public function delete_instance($instance) {
-        global $DB;
         parent::delete_instance($instance);
-        // The observer removes the records of each unenrolled user; this catches anything left.
-        $DB->delete_records(\enrol_conditional\local\enforcer::TABLE, ['instanceid' => $instance->id]);
+        // The observers of local_enrolconditions remove the condition records of the instance.
         $this->purge_event_map();
     }
 
@@ -903,7 +890,7 @@ class enrol_conditional_plugin extends enrol_plugin {
         if (empty($user->id) || isguestuser($user)) {
             return;
         }
-        (new \enrol_conditional\local\enforcer($this))->check_user_in_mode((int) $user->id, self::CHECK_LOGIN);
+        (new \local_enrolconditions\local\enforcer())->check_user_in_mode((int) $user->id, self::CHECK_LOGIN, 'conditional');
     }
 
     /**
@@ -1124,31 +1111,12 @@ class enrol_conditional_plugin extends enrol_plugin {
             );
             $mform->addHelpButton(self::FIELD_CONDITIONS . '_editor', 'conditions', 'enrol_conditional');
 
-            $mform->addElement(
-                'select',
-                'conditionaction',
-                get_string('conditionaction', 'enrol_conditional'),
-                $this->get_condition_action_options()
+            \local_enrolconditions\output\enforcement_form::add_to_form(
+                $mform,
+                self::get_condition_action($instance),
+                self::get_reactivate($instance),
+                self::get_check_modes($instance),
             );
-            $mform->addHelpButton('conditionaction', 'conditionaction', 'enrol_conditional');
-            $mform->setDefault('conditionaction', self::get_condition_action($instance));
-
-            $mform->addElement('advcheckbox', 'conditionreactivate', get_string('conditionreactivate', 'enrol_conditional'));
-            $mform->addHelpButton('conditionreactivate', 'conditionreactivate', 'enrol_conditional');
-            $mform->setDefault('conditionreactivate', (int) self::get_reactivate($instance));
-
-            $modes = self::get_check_modes($instance);
-            $elements = [
-                $mform->createElement('static', 'checkmodeenrol', '', get_string('checkmodeenrol', 'enrol_conditional')),
-            ];
-            foreach (array_keys(self::CHECK_MODE_FIELDS) as $name) {
-                $elements[] = $mform->createElement('advcheckbox', $name, '', get_string($name, 'enrol_conditional'));
-            }
-            $mform->addGroup($elements, 'checkmodes', get_string('checkmodes', 'enrol_conditional'), '<br>', false);
-            $mform->addHelpButton('checkmodes', 'checkmodes', 'enrol_conditional');
-            foreach (self::CHECK_MODE_FIELDS as $name => $bit) {
-                $mform->setDefault($name, (int) (($modes & $bit) === $bit));
-            }
         }
 
         // Course welcome message.
@@ -1419,11 +1387,7 @@ class enrol_conditional_plugin extends enrol_plugin {
      * @return array
      */
     public function get_condition_action_options(): array {
-        return [
-            self::ACTION_NONE => get_string('conditionactionnone', 'enrol_conditional'),
-            self::ACTION_SUSPEND => get_string('conditionactionsuspend', 'enrol_conditional'),
-            self::ACTION_REMOVE => get_string('conditionactionremove', 'enrol_conditional'),
-        ];
+        return \local_enrolconditions\output\enforcement_form::get_action_options();
     }
 
     /**
@@ -1476,21 +1440,21 @@ class enrol_conditional_plugin extends enrol_plugin {
         if (!$sent) {
             return;
         }
-        $modes = self::get_check_modes($instance);
-        foreach (self::CHECK_MODE_FIELDS as $name => $bit) {
-            if (array_key_exists($name, $fields)) {
-                $modes = empty($fields[$name]) ? ($modes & ~$bit) : ($modes | $bit);
-                unset($fields[$name]);
-            }
-        }
-        $fields[self::FIELD_CHECKMODES] = $modes | self::CHECK_ENROL;
+        $submitted = \local_enrolconditions\output\enforcement_form::get_submitted(
+            $sent,
+            self::get_condition_action($instance),
+            self::get_reactivate($instance),
+            self::get_check_modes($instance)
+        );
+        $fields = array_diff_key($fields, self::CHECK_MODE_FIELDS);
+        $fields[self::FIELD_CHECKMODES] = $submitted['modes'];
     }
 
     /**
      * Forgets the cached map of observed events, after an instance changed.
      */
     protected function purge_event_map(): void {
-        \cache::make('enrol_conditional', 'observedevents')->purge();
+        \local_enrolconditions\local\enforcer::purge_event_map();
     }
 
     /**

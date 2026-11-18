@@ -14,6 +14,6 @@ Backup and restore
 Privacy
 -------
 
-* ``enrol_conditional`` stores, for each suspension made by the plugin, the enrolment, the action, the reason and the dates. These records are exported and deleted with the course or the user, through the Privacy API.
+* ``enrol_conditional`` stores no personal data. ``local_enrolconditions`` stores, for each suspension made because of the conditions, the enrolment, the action, the reason and the dates. These records are exported and deleted with the course or the user, through its Privacy API.
 * ``enrolcond_userfile`` finds the users listed in the files of usernames: their data request exports the file names, and their deletion removes their line from the files.
 * The other condition types store no personal data.

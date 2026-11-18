@@ -13,7 +13,7 @@ When the user logs in
    The enrolments of the user in instances with this mode are checked at each login.
 
 Periodically, in the scheduled task
-   The task *Re-check the conditions of conditional self enrolments* checks the enrolments in batches (*Enrolments per periodic check*) and resumes where the previous run stopped.
+   The task *Re-check the conditions of existing enrolments*, of ``local_enrolconditions``, checks the enrolments in batches (*Enrolments per periodic check*) and resumes where the previous run stopped.
 
 When something the conditions depend on changes
    The enrolments are checked when an event observed by the conditions happens: profile updated (profile), cohort member added or removed (cohort), course completed (course completed). Conditions that depend only on time or on lists (date, usernames, queries) have no event: combine them with the login or periodic check.
@@ -49,6 +49,6 @@ Remove the enrolment
 Which suspensions are reactivated
 ---------------------------------
 
-The plugin only reactivates an enrolment that **it** suspended and that **nobody changed since**. It keeps its own record of each suspension (table ``enrol_conditional_state``). If a teacher, an administrator or another plugin suspends, reactivates or edits the enrolment, the record is closed and the plugin no longer touches that enrolment. A manual suspension is never undone by the conditions.
+The plugin only reactivates an enrolment that **it** suspended and that **nobody changed since**. The re-checks are done by ``local_enrolconditions``, which keeps a record of each suspension (table ``local_enrolconditions_state``). If a teacher, an administrator or another plugin suspends, reactivates or edits the enrolment, the record is closed and the plugin no longer touches that enrolment. A manual suspension is never undone by the conditions.
 
 Unknown results (a condition that cannot be checked) never suspend, remove or reactivate.

@@ -16,9 +16,9 @@
 
 namespace enrol_conditional;
 
-use enrol_conditional\local\enforcer;
 use enrol_conditional_plugin;
 use local_enrolconditions\condition\manager;
+use local_enrolconditions\local\enforcer;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -36,8 +36,8 @@ require_once($CFG->dirroot . '/local/enrolconditions/tests/fixtures/fake_conditi
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(enforcer::class)]
-#[\PHPUnit\Framework\Attributes\CoversClass(observer::class)]
-#[\PHPUnit\Framework\Attributes\CoversClass(task\check_conditions::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(\local_enrolconditions\observer::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(\local_enrolconditions\task\check_conditions::class)]
 #[\PHPUnit\Framework\Attributes\CoversClass(enrol_conditional_plugin::class)]
 final class check_modes_test extends \advanced_testcase {
     /** @var enrol_conditional_plugin */
@@ -185,17 +185,17 @@ final class check_modes_test extends \advanced_testcase {
             $this->plugin->enrol_user($flagged, $users[$i]->id);
         }
         $this->plugin->enrol_user($other, $users[0]->id);
-        $enforcer = new enforcer($this->plugin);
+        $enforcer = new enforcer();
 
         $first = $enforcer->check_batch(2);
         $this->assertCount(2, $first);
         $this->assertSame(enforcer::OUTCOME_SUSPENDED, reset($first));
-        $this->assertSame((int) array_key_last($first), (int) get_config('enrol_conditional', 'periodiccursor'));
+        $this->assertSame((int) array_key_last($first), (int) get_config('local_enrolconditions', 'periodiccursor'));
         $this->assertSame(ENROL_USER_ACTIVE, $this->ue_status($flagged, $users[2]->id));
 
         $second = $enforcer->check_batch(2);
         $this->assertCount(1, $second);
-        $this->assertSame(0, (int) get_config('enrol_conditional', 'periodiccursor'));
+        $this->assertSame(0, (int) get_config('local_enrolconditions', 'periodiccursor'));
         $this->assertSame(ENROL_USER_SUSPENDED, $this->ue_status($flagged, $users[2]->id));
 
         // The instance without the periodic mode is never touched; the cycle starts again.
@@ -209,9 +209,9 @@ final class check_modes_test extends \advanced_testcase {
         $instance = $this->create_instance(['checkmodeperiodic']);
         $user = $this->getDataGenerator()->create_user();
         $this->plugin->enrol_user($instance, $user->id);
-        set_config('checkbatchsize', 10, 'enrol_conditional');
+        set_config('checkbatchsize', 10, 'local_enrolconditions');
 
-        $task = new task\check_conditions();
+        $task = new \local_enrolconditions\task\check_conditions();
         $this->assertNotEmpty($task->get_name());
         $this->expectOutputRegex('/1 enrolments checked/');
         $task->execute();
@@ -224,8 +224,8 @@ final class check_modes_test extends \advanced_testcase {
         $this->plugin->enrol_user($instance, $user->id);
         \core\plugininfo\enrol::enable_plugin('conditional', false);
 
-        $this->expectOutputRegex('/disabled/');
-        (new task\check_conditions())->execute();
+        $this->expectOutputRegex('/No enabled enrolment method/');
+        (new \local_enrolconditions\task\check_conditions())->execute();
         $this->assertSame(ENROL_USER_ACTIVE, $this->ue_status($instance, $user->id));
     }
 
@@ -236,7 +236,7 @@ final class check_modes_test extends \advanced_testcase {
         $this->plugin->enrol_user($withevents, $user->id);
         $this->plugin->enrol_user($without, $user->id);
 
-        $this->assertSame([(int) $withevents->id], enforcer::get_event_map()['core\event\user_updated']);
+        $this->assertSame([(int) $withevents->id], (new enforcer())->get_event_map()['core\event\user_updated']);
 
         \core\event\user_updated::create_from_userid($user->id)->trigger();
         $this->assertSame(ENROL_USER_SUSPENDED, $this->ue_status($withevents, $user->id));
@@ -255,7 +255,7 @@ final class check_modes_test extends \advanced_testcase {
         $instance = $this->create_instance(['checkmodelogin']);
         $this->plugin->enrol_user($instance, $user->id);
 
-        $this->assertSame([], enforcer::get_event_map());
+        $this->assertSame([], (new enforcer())->get_event_map());
         \core\event\user_updated::create_from_userid($user->id)->trigger();
         $this->assertSame(ENROL_USER_ACTIVE, $this->ue_status($instance, $user->id));
 
@@ -265,7 +265,7 @@ final class check_modes_test extends \advanced_testcase {
 
         $instance = $DB->get_record('enrol', ['id' => $instance->id]);
         $this->plugin->update_status($instance, ENROL_INSTANCE_DISABLED);
-        $this->assertSame([], enforcer::get_event_map());
+        $this->assertSame([], (new enforcer())->get_event_map());
     }
 
     public function test_events_ignored_when_plugin_disabled(): void {

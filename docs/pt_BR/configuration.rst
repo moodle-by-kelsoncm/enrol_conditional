@@ -15,8 +15,7 @@ Reactivate when the conditions are met again
 When the user logs in / Periodically, in the scheduled task / When something the conditions depend on changes
    Modos de reavaliação padrão das novas instâncias. Todos desligados por padrão: as novas instâncias só avaliam as condições quando o usuário se inscreve.
 
-Enrolments per periodic check
-   Máximo de inscrições reavaliadas a cada execução da tarefa agendada (padrão 500). A execução seguinte continua de onde a anterior parou.
+O número de inscrições reavaliadas a cada execução da tarefa agendada (*Enrolments per periodic check*) fica em *Administração do site > Plugins > Inscrições > Enrolment conditions > Re-checks* (veja a `documentação do Enrolment conditions <https://moodle-by-kelsoncm.github.io/moodle-local_enrolconditions/pt_BR/administration.html>`_).
 
 Cursos novos não recebem uma instância deste método por padrão (*Adicionar instância a novos cursos* fica desligado).
 
