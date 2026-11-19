@@ -55,18 +55,14 @@ class enrol_conditional_editselectedusers_operation extends enrol_bulk_enrolment
      * @param stdClass $properties The data returned by the form.
      */
     public function process(course_enrolment_manager $manager, array $users, stdClass $properties) {
-        global $DB, $USER;
-
         if (!has_capability("enrol/conditional:manage", $manager->get_context())) {
             return false;
         }
 
-        // Get all of the user enrolment id's.
-        $ueids = [];
+        // Get all of the user enrolments.
         $instances = [];
         foreach ($users as $user) {
             foreach ($user->enrolments as $enrolment) {
-                $ueids[] = $enrolment->id;
                 if (!array_key_exists($enrolment->id, $instances)) {
                     $instances[$enrolment->id] = $enrolment;
                 }
@@ -80,68 +76,27 @@ class enrol_conditional_editselectedusers_operation extends enrol_bulk_enrolment
             }
         }
 
-        // Collect the known properties.
-        $status = $properties->status;
-        $timestart = $properties->timestart;
-        $timeend = $properties->timeend;
-
-        [$ueidsql, $params] = $DB->get_in_or_equal($ueids, SQL_PARAMS_NAMED);
-
-        $updatesql = [];
-        if ($status == ENROL_USER_ACTIVE || $status == ENROL_USER_SUSPENDED) {
-            $updatesql[] = 'status = :status';
-            $params['status'] = (int)$status;
+        // Collect the known properties; null keeps the stored value.
+        $status = null;
+        if ($properties->status == ENROL_USER_ACTIVE || $properties->status == ENROL_USER_SUSPENDED) {
+            $status = (int)$properties->status;
         }
-        if (!empty($timestart)) {
-            $updatesql[] = 'timestart = :timestart';
-            $params['timestart'] = (int)$timestart;
-        }
-        if (!empty($timeend)) {
-            $updatesql[] = 'timeend = :timeend';
-            $params['timeend'] = (int)$timeend;
-        }
-        if (empty($updatesql)) {
+        $timestart = empty($properties->timestart) ? null : (int)$properties->timestart;
+        $timeend = empty($properties->timeend) ? null : (int)$properties->timeend;
+        if ($status === null && $timestart === null && $timeend === null) {
             return true;
         }
 
-        // Update the modifierid.
-        $updatesql[] = 'modifierid = :modifierid';
-        $params['modifierid'] = (int)$USER->id;
-
-        // Update the time modified.
-        $updatesql[] = 'timemodified = :timemodified';
-        $params['timemodified'] = time();
-
-        // Build the SQL statement.
-        $updatesql = join(', ', $updatesql);
-        $sql = "UPDATE {user_enrolments}
-                   SET $updatesql
-                 WHERE id $ueidsql";
-
-        if ($DB->execute($sql, $params)) {
-            foreach ($users as $user) {
-                foreach ($user->enrolments as $enrolment) {
-                    $enrolment->courseid  = $enrolment->enrolmentinstance->courseid;
-                    $enrolment->enrol     = 'conditional';
-                    // Trigger event.
-                    $event = \core\event\user_enrolment_updated::create(
-                        [
-                            'objectid' => $enrolment->id,
-                            'courseid' => $enrolment->courseid,
-                            'context' => context_course::instance($enrolment->courseid),
-                            'relateduserid' => $user->id,
-                            'other' => ['enrol' => 'conditional'],
-                        ]
-                    );
-                    $event->trigger();
-                }
+        // The enrolment API updates each record, sets modifierid and timemodified and triggers the event.
+        foreach ($users as $user) {
+            foreach ($user->enrolments as $enrolment) {
+                $this->plugin->update_user_enrol($enrolment->enrolmentinstance, $user->id, $status, $timestart, $timeend);
             }
-            // Delete cached course contacts for this course because they may be affected.
-            cache::make('core', 'coursecontacts')->delete($manager->get_context()->instanceid);
-            return true;
         }
 
-        return false;
+        // Delete cached course contacts for this course because they may be affected.
+        cache::make('core', 'coursecontacts')->delete($manager->get_context()->instanceid);
+        return true;
     }
 
     /**

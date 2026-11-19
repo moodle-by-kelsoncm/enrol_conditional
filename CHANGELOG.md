@@ -2,6 +2,14 @@
 
 All notable changes to the Conditional self enrolment plugin will be documented in this file.
 
+## 1.1.1 - 2026-11-19
+
+### Changed
+- The bulk operation *Edit selected user enrolments* updates each enrolment with the enrolment API (`update_user_enrol()`) instead of `$DB->execute()`. The event `user_enrolment_updated` is now triggered only for enrolments that actually change.
+
+### Added
+- PHPUnit tests for the bulk operation.
+
 ## 1.1.0 - 2026-11-18
 
 ### Changed
